@@ -1,0 +1,1 @@
+Power up your EV experience with the Voltie app on Homey Pro. Voltie brings smart charging and advanced energy management into one seamless system—fully compatible with all electric vehicles. Whether you're charging at home, at work, or on the go, Voltie keeps you in control.
