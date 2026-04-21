@@ -1,7 +1,7 @@
 {
   "id": "com.heszi.voltie",
   "version": "1.0.0",
-  "compatibility": ">=12.4.0",
+  "compatibility": ">=12.5.0",
   "sdk": 3,
   "runtime": "nodejs",
   "platforms": [
@@ -11,7 +11,7 @@
     "en": "Voltie"
   },
   "description": {
-    "en": "Power up your EV experience with the Voltie app on Homey Pro. Voltie brings smart charging and advanced energy management into one seamless system—fully compatible with all electric vehicles. Whether you're charging at home, at work, or on the go, Voltie keeps you in control."
+    "en": "Smarter charging. Lower costs. Greener energy."
   },
   "category": [
     "energy"
@@ -25,5 +25,15 @@
   "author": {
     "name": "Andras Heszegi",
     "email": "heszegi@gmail.com"
+  },
+  "brandColor": "#20b6bc",
+  "tags": {
+    "en": [
+      "ev; charger; home charging; energy;"
+    ]
+  },
+  "homepage": "https://www.voltie.eu/en/",
+  "contributors": {
+    "developers": []
   }
 }

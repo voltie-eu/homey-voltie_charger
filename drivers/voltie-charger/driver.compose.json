@@ -1,0 +1,38 @@
+{
+  "name": {
+    "en": "Voltie Charger"
+  },
+  "class": "evcharger",
+  "capabilities": [
+    "evcharger_charging",
+    "evcharger_charging_state",
+    "measure_power",
+    "meter_power.charged"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "discovery": "voltie_discovery",
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "choose_pairing"
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": { "next": "setup_device" },
+      "options": { "singular": true }
+    },
+    {
+      "id": "setup_device"
+    }
+  ]
+}

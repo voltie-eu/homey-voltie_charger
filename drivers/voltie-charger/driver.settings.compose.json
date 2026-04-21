@@ -1,0 +1,30 @@
+[
+    {
+        "id": "ip",
+        "type": "text",
+        "value":"",
+        "label": { "en": "IP Address" },
+        "hint": { "en": "The IP address of Your Voltie charger" }
+    },
+    {
+        "id": "port",
+        "type": "text",
+        "value":"",
+        "label": { "en": "Port" },
+        "hint": { "en": "The port of Your Voltie charger" }
+    },
+    {
+        "id": "username",
+        "type": "text",
+        "value":"",
+        "label": { "en": "Username" },
+        "hint": { "en": "The username for your Voltie charger (if applicable)" }
+    },
+    {
+        "id": "password",
+        "type": "password",
+        "value":"",
+        "label": { "en": "Password" },
+        "hint": { "en": "The password for your Voltie charger (if applicable)" }
+    }
+]

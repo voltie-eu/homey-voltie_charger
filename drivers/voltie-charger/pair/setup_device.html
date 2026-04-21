@@ -1,0 +1,109 @@
+<form class="homey-form" onsubmit="handleSetup(event)">
+  <fieldset class="homey-form-group" style="margin: 1rem 0 2rem;">
+    <div class="homey-form-group" style="margin-top: 0;">
+      <label class="homey-form-label" for="dName" data-i18n="pair.setup_device.labels.name" style="margin-top: 0;"></label>
+      <input class="homey-form-input" id="dName" type="text" required/>
+    </div>
+
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="dId" data-i18n="pair.setup_device.labels.id"></label>
+      <input class="homey-form-input" id="dId" type="text" required/>
+    </div>
+
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="dIp" data-i18n="pair.setup_device.labels.ip"></label>
+      <input class="homey-form-input" id="dIp" type="text" required/>
+    </div>
+
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="dPort" data-i18n="pair.setup_device.labels.port"></label>
+      <input class="homey-form-input" id="dPort" type="text" value="5059" required/>
+    </div>
+
+    <div class="homey-form-group">
+      <label class="homey-form-label" for="dUser" data-i18n="pair.setup_device.labels.user"></label>
+      <input class="homey-form-input" id="dUser" type="text"/>
+    </div>
+
+    <div class="homey-form-group" style="margin-bottom: var(--homey-su-1);">
+      <label class="homey-form-label" for="dPass" data-i18n="pair.setup_device.labels.pass"></label>
+      <input class="homey-form-input" id="dPass" type="password"/>
+    </div>
+  </fieldset>
+
+  <button class="homey-button-primary-full" type="submit" data-i18n="pair.setup_device.next" id="setupBtn" disabled="disabled"></button>
+</form>
+
+<script type="application/javascript">
+  Homey.setTitle( __('pair.setup_device.title') );
+
+  const dName = document.getElementById('dName');
+  const dId = document.getElementById('dId');
+  const dIp = document.getElementById('dIp');
+  const dPort = document.getElementById('dPort');
+  const dUser = document.getElementById('dUser');
+  const dPass = document.getElementById('dPass');
+
+  const fields = [dName,dId,dIp];
+  const setupBtn = document.getElementById('setupBtn');
+
+  fields.forEach(field => {
+    field.addEventListener('input', () => {
+      enableSetupBtn();
+    });
+  })
+
+  Homey.emit("get_device").then(device => {
+    if(!device) return;
+
+    dName.value = device.name;
+    dName.setAttribute('readonly', 'readonly');
+    dId.value = device.data.id;
+    dId.setAttribute('readonly', 'readonly');
+    dIp.value = device.settings.ip;
+    dIp.setAttribute('readonly', 'readonly');
+    
+    enableSetupBtn();
+  });
+
+  function enableSetupBtn() {
+    setupBtn.removeAttribute('disabled');
+    for(const f of fields) {
+      if(f.value.trim() === '') {
+        setupBtn.setAttribute('disabled', 'disabled');
+        break;
+      }
+    }
+  }
+
+  function handleSetup(event) {
+    event.preventDefault();
+
+    createDevice({
+      name: dName.value.trim(),
+      data: {
+        id: dId.value.trim(),
+      },
+      settings: {
+        ip: dIp.value.trim(),
+        host: dIp.value.trim(),
+        port: parseInt(dPort.value.trim()),
+        user: dUser.value.trim(),
+        pass: dPass.value.trim()
+      },
+    });
+  }
+
+  function createDevice(device){
+    Homey.emit("get_new_device", device).then(newDevice => {
+      if(newDevice){
+        Homey.createDevice(device);
+        Homey.done();
+      } else {
+        Homey.alert(__('pair.setup_device.already_added_device', {host: device.data.host}), "info").then(respons => {
+          Homey.done();
+        });
+      }
+    })
+  }
+</script>
