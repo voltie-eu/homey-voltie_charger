@@ -7,8 +7,12 @@
     "evcharger_charging",
     "evcharger_charging_state",
     "measure_power",
-    "meter_power.charged"
+    "meter_power"
   ],
+  "energy": {
+    "evCharger": true,
+    "meterPowerImportedCapability": "meter_power"
+  },
   "platforms": [
     "local"
   ],
@@ -16,6 +20,7 @@
     "lan"
   ],
   "discovery": "voltie_discovery",
+  "icon": "{{driverAssetsPath}}/icon.svg",
   "images": {
     "small": "{{driverAssetsPath}}/images/small.png",
     "large": "{{driverAssetsPath}}/images/large.png",

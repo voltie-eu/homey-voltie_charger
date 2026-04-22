@@ -27,13 +27,13 @@
     "name": "Andras Heszegi",
     "email": "heszegi@gmail.com"
   },
-  "brandColor": "#20b6bc",
+  "brandColor": "#528AC8",
   "tags": {
     "en": [
       "ev; charger; home charging; energy;"
     ]
   },
-  "homepage": "https://www.voltie.eu/en/",
+  "homepage": "https://www.voltie.eu",
   "contributors": {
     "developers": []
   },
@@ -47,8 +47,12 @@
         "evcharger_charging",
         "evcharger_charging_state",
         "measure_power",
-        "meter_power.charged"
+        "meter_power"
       ],
+      "energy": {
+        "evCharger": true,
+        "meterPowerImportedCapability": "meter_power"
+      },
       "platforms": [
         "local"
       ],
@@ -56,6 +60,7 @@
         "lan"
       ],
       "discovery": "voltie_discovery",
+      "icon": "/drivers/voltie-charger/assets/icon.svg",
       "images": {
         "small": "/drivers/voltie-charger/assets/images/small.png",
         "large": "/drivers/voltie-charger/assets/images/large.png",
