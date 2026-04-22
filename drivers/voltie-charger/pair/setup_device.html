@@ -21,13 +21,13 @@
     </div>
 
     <div class="homey-form-group">
-      <label class="homey-form-label" for="dUser" data-i18n="pair.setup_device.labels.user"></label>
-      <input class="homey-form-input" id="dUser" type="text"/>
+      <label class="homey-form-label" for="dUsername" data-i18n="pair.setup_device.labels.username"></label>
+      <input class="homey-form-input" id="dUsername" type="text"/>
     </div>
 
     <div class="homey-form-group" style="margin-bottom: var(--homey-su-1);">
-      <label class="homey-form-label" for="dPass" data-i18n="pair.setup_device.labels.pass"></label>
-      <input class="homey-form-input" id="dPass" type="password"/>
+      <label class="homey-form-label" for="dPassword" data-i18n="pair.setup_device.labels.password"></label>
+      <input class="homey-form-input" id="dPassword" type="password"/>
     </div>
   </fieldset>
 
@@ -41,8 +41,8 @@
   const dId = document.getElementById('dId');
   const dIp = document.getElementById('dIp');
   const dPort = document.getElementById('dPort');
-  const dUser = document.getElementById('dUser');
-  const dPass = document.getElementById('dPass');
+  const dUsername = document.getElementById('dUsername');
+  const dPassword = document.getElementById('dPassword');
 
   const fields = [dName,dId,dIp];
   const setupBtn = document.getElementById('setupBtn');
@@ -86,10 +86,9 @@
       },
       settings: {
         ip: dIp.value.trim(),
-        host: dIp.value.trim(),
         port: parseInt(dPort.value.trim()),
-        user: dUser.value.trim(),
-        pass: dPass.value.trim()
+        username: dUsername.value.trim(),
+        password: dPassword.value.trim()
       },
     });
   }

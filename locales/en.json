@@ -13,8 +13,8 @@
                 "id": "Unique ID",
                 "ip": "IP address",
                 "port": "Port",
-                "user": "User name (not required)",
-                "pass": "Password (not required)"
+                "username": "User name (not required)",
+                "password": "Password (not required)"
             },
             "next": "Add device",
             "already_added_device": "Device with hostname: [__host__] already paired with Homey!"

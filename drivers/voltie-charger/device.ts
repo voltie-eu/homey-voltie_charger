@@ -1,12 +1,37 @@
 import Homey from 'homey';
+import VoltieAPI from '../../libs/Voltie/VoltieAPI';
+import { VoltieSettings } from './driver';
 
 module.exports = class VoltieDevice extends Homey.Device {
+  api!: VoltieAPI;
 
   /**
    * onInit is called when the device is initialized.
    */
   async onInit() {
     this.log('VoltieDevice has been initialized');
+
+    const settings: VoltieSettings = this.getSettings();
+
+    this.api = new VoltieAPI({
+      ip: settings.ip,
+      port: settings.port,
+      username: settings.username?.length ? settings.username : undefined,
+      password: settings.password?.length ? settings.password : undefined
+    });
+
+    console.log(await this.api.getStatus());
+    console.log(await this.api.getPowerDetails());
+
+    this.setCapabilityValue('evcharger_charging_state', 'plugged_out');
+    /*  
+      evcharger_charging_state:
+        plugged_out
+        plugged_in
+        plugged_in_charging
+        plugged_in_discharging
+        plugged_in_paused
+     */
   }
 
   /**

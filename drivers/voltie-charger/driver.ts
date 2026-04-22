@@ -1,19 +1,19 @@
 import Homey, { DiscoveryResultMDNSSD } from 'homey';
 import { PairSession } from 'homey/lib/Driver';
 
-export interface IDeviceData{
+export interface VoltieData{
   id: string; // The device hostname
 }
-export interface IDeviceSettings{
+export interface VoltieSettings{
   ip: string;
   port?: number;
-  user?: string;
-  pass?: string;
+  username?: string;
+  password?: string;
 }
-export interface IDevice {
+export interface VoltieDevice {
   name: string;
-  data: IDeviceData;
-  settings: IDeviceSettings;
+  data: VoltieData;
+  settings: VoltieSettings;
 }
 
 module.exports = class VoltieDriver extends Homey.Driver {
@@ -43,12 +43,12 @@ module.exports = class VoltieDriver extends Homey.Driver {
             settings: {
               ip: device.address
             },
-          } as IDevice;
+          } as VoltieDevice;
         }),
       );
     });
 
-    session.setHandler('list_devices_selection', async (devices: IDevice[]) => {
+    session.setHandler('list_devices_selection', async (devices: VoltieDevice[]) => {
       selectedDevice = devices[0];
     });
 
@@ -56,14 +56,14 @@ module.exports = class VoltieDriver extends Homey.Driver {
       return selectedDevice;
     });
 
-    session.setHandler('get_new_device', async (device: IDevice) => {
+    session.setHandler('get_new_device', async (device: VoltieDevice) => {
       return this.getNewDevices([device])[0];
     });
   }
 
-  getNewDevices(discoveredDevices:IDevice[]) {
+  getNewDevices(discoveredDevices:VoltieDevice[]) {
     const pairedDevices = Object.values(this.getDevices());
-    const newDevices:IDevice[] = [];
+    const newDevices:VoltieDevice[] = [];
 
     let newDevice = true;
     discoveredDevices.forEach(discoveredDevice => {
