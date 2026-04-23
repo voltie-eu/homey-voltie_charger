@@ -14,6 +14,13 @@
         "hint": { "en": "The port of Your Voltie charger" }
     },
     {
+        "id": "maxCurrentLimit",
+        "type": "text",
+        "value":"",
+        "label": { "en": "Maximum Current Limit" },
+        "hint": { "en": "The maximum current limit for your Voltie charger, be careful not to exceed the installation's capabilities!" }
+    },
+    {
         "id": "username",
         "type": "text",
         "value":"",

@@ -5,9 +5,12 @@
   "class": "evcharger",
   "capabilities": [
     "evcharger_charging",
+    "autostart",
     "evcharger_charging_state",
+    "meter_power",
     "measure_power",
-    "meter_power"
+    "measure_current",
+    "current_limit"
   ],
   "energy": {
     "evCharger": true,
@@ -33,8 +36,12 @@
     {
       "id": "list_devices",
       "template": "list_devices",
-      "navigation": { "next": "setup_device" },
-      "options": { "singular": true }
+      "navigation": {
+        "next": "setup_device"
+      },
+      "options": {
+        "singular": true
+      }
     },
     {
       "id": "setup_device"

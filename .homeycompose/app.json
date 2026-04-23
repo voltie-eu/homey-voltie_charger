@@ -1,7 +1,7 @@
 {
-  "id": "com.heszi.voltie",
+  "id": "eu.voltie.homey",
   "version": "1.0.0",
-  "compatibility": ">=12.5.0",
+  "compatibility": ">=12.13.0",
   "sdk": 3,
   "runtime": "nodejs",
   "platforms": [
@@ -34,6 +34,15 @@
   },
   "homepage": "https://www.voltie.eu",
   "contributors": {
-    "developers": []
+    "developers": [
+      {
+        "name": "András Heszegi"
+      }
+    ]
+  },
+  "source": "https://github.com/voltie-eu/homey-voltie_charger",
+  "support": "mailto:info@voltie.eu",
+  "bugs": {
+    "url": "https://github.com/voltie-eu/homey-voltie_charger/issues"
   }
 }

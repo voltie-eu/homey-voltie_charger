@@ -10,14 +10,22 @@
       <input class="homey-form-input" id="dId" type="text" required/>
     </div>
 
-    <div class="homey-form-group">
-      <label class="homey-form-label" for="dIp" data-i18n="pair.setup_device.labels.ip"></label>
-      <input class="homey-form-input" id="dIp" type="text" required/>
+    <div class="homey-form-group" style="display: flex; gap: var(--homey-su-2);">
+      <div style="flex-basis: 70%;">
+        <label class="homey-form-label" for="dIp" data-i18n="pair.setup_device.labels.ip" style="margin-top: 0;"></label>
+        <input class="homey-form-input" id="dIp" type="text" required/>
+      </div>
+
+      <div style="flex-basis: 30%;">
+        <label class="homey-form-label" for="dPort" data-i18n="pair.setup_device.labels.port" style="margin-top: 0;"></label>
+        <input class="homey-form-input" id="dPort" type="text" value="5059" required/>
+      </div>
     </div>
 
     <div class="homey-form-group">
-      <label class="homey-form-label" for="dPort" data-i18n="pair.setup_device.labels.port"></label>
-      <input class="homey-form-input" id="dPort" type="text" value="5059" required/>
+      <label class="homey-form-label" for="dMaxCurrentLimit" data-i18n="pair.setup_device.labels.maxCurrentLimit"></label>
+      <input class="homey-form-input" id="dMaxCurrentLimit" type="number" min="6" max="32" value="16" required/>
+      <div data-i18n="pair.setup_device.labels.maxCurrentLimitDesc" style="font-size: 12px; color: var(--homey-color-text-danger);"></div>
     </div>
 
     <div class="homey-form-group">
@@ -41,10 +49,11 @@
   const dId = document.getElementById('dId');
   const dIp = document.getElementById('dIp');
   const dPort = document.getElementById('dPort');
+  const dMaxCurrentLimit = document.getElementById('dMaxCurrentLimit');
   const dUsername = document.getElementById('dUsername');
   const dPassword = document.getElementById('dPassword');
 
-  const fields = [dName,dId,dIp];
+  const fields = [dName,dId,dIp,dMaxCurrentLimit];
   const setupBtn = document.getElementById('setupBtn');
 
   fields.forEach(field => {
@@ -62,7 +71,6 @@
     dId.setAttribute('readonly', 'readonly');
     dIp.value = device.settings.ip;
     dIp.setAttribute('readonly', 'readonly');
-    
     enableSetupBtn();
   });
 
@@ -88,7 +96,8 @@
         ip: dIp.value.trim(),
         port: parseInt(dPort.value.trim()),
         username: dUsername.value.trim(),
-        password: dPassword.value.trim()
+        password: dPassword.value.trim(),
+        maxCurrentLimit: parseInt(dMaxCurrentLimit.value.trim())
       },
     });
   }

@@ -6,7 +6,8 @@ export interface VoltieData{
 }
 export interface VoltieSettings{
   ip: string;
-  port?: number;
+  port: number;
+  maxCurrentLimit: number;
   username?: string;
   password?: string;
 }

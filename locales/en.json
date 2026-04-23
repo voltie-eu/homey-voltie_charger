@@ -13,6 +13,8 @@
                 "id": "Unique ID",
                 "ip": "IP address",
                 "port": "Port",
+                "maxCurrentLimit": "Maximum Charging Current Limit (A)",
+                "maxCurrentLimitDesc": "Be careful not to exceed the installation's capabilities!",  
                 "username": "User name (not required)",
                 "password": "Password (not required)"
             },

@@ -20,10 +20,15 @@ module.exports = class VoltieDevice extends Homey.Device {
       password: settings.password?.length ? settings.password : undefined
     });
 
+    this.setMaxCurrentLimit(settings.maxCurrentLimit);
+
     console.log(await this.api.getStatus());
     console.log(await this.api.getPowerDetails());
+    console.log(await this.api.getConfiguration());
 
     this.setCapabilityValue('evcharger_charging_state', 'plugged_out');
+    this.setCapabilityValue('current_limit', '6');
+
     /*  
       evcharger_charging_state:
         plugged_out
@@ -75,6 +80,14 @@ module.exports = class VoltieDevice extends Homey.Device {
    */
   async onDeleted() {
     this.log('VoltieDevice has been deleted');
+  }
+
+  setMaxCurrentLimit(limit: number){
+    const values: { id: string; title: { en: string } }[] = [];
+    for (var i = 6; i <= limit; i++){
+      values.push({id: i.toString(), title: { "en": `Max current ${i}A`}});
+    }
+    this.setCapabilityOptions('current_limit', { values });
   }
 
 };
