@@ -46,6 +46,130 @@
   "bugs": {
     "url": "https://github.com/voltie-eu/homey-voltie_charger/issues"
   },
+  "flow": {
+    "triggers": [
+      {
+        "id": "current_limit_changed",
+        "title": {
+          "en": "Current limit changed"
+        },
+        "tokens": [
+          {
+            "name": "current_limit",
+            "title": {
+              "en": "Current limit"
+            },
+            "type": "number",
+            "example": "6"
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      },
+      {
+        "id": "autostart_changed",
+        "title": {
+          "en": "Auto Start changed"
+        },
+        "tokens": [
+          {
+            "name": "autostart",
+            "title": {
+              "en": "Auto Start"
+            },
+            "type": "boolean",
+            "example": true
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "autostart",
+        "title": {
+          "en": "Auto Start is turned !{{on|off}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "set_current_limit",
+        "title": {
+          "en": "Set current limit to [[current_limit]]A"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          },
+          {
+            "type": "number",
+            "name": "current_limit",
+            "title": {
+              "en": "Current limit"
+            },
+            "min": 6,
+            "max": 32,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "set_autostart",
+        "title": {
+          "en": "Set Auto Start to [[autostart]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          },
+          {
+            "type": "dropdown",
+            "name": "autostart",
+            "title": {
+              "en": "On/Off"
+            },
+            "values": [
+              {
+                "id": "on",
+                "title": {
+                  "en": "On"
+                }
+              },
+              {
+                "id": "off",
+                "title": {
+                  "en": "Off"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "drivers": [
     {
       "name": {
@@ -117,7 +241,7 @@
             "en": "Port"
           },
           "hint": {
-            "en": "The port of Your Voltie charger"
+            "en": "The port of Your Voltie charger (default: 5059)"
           }
         },
         {

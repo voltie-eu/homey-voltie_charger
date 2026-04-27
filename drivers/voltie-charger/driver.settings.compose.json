@@ -11,7 +11,7 @@
         "type": "text",
         "value":"",
         "label": { "en": "Port" },
-        "hint": { "en": "The port of Your Voltie charger" }
+        "hint": { "en": "The port of Your Voltie charger (default: 5059)" }
     },
     {
         "id": "maxCurrentLimit",

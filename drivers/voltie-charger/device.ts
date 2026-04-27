@@ -3,7 +3,10 @@ import VoltieAPI from '../../libs/Voltie/VoltieAPI';
 import { VoltieSettings } from './driver';
 
 module.exports = class VoltieDevice extends Homey.Device {
-  api!: VoltieAPI;
+  static DEFAULT_PULLING_INTERVAL = 10000;
+  static CONNECTED_PULLING_INTERVAL = 5000;
+
+  private api!: VoltieAPI;
 
   /**
    * onInit is called when the device is initialized.
@@ -11,16 +14,7 @@ module.exports = class VoltieDevice extends Homey.Device {
   async onInit() {
     this.log('VoltieDevice has been initialized');
 
-    const settings: VoltieSettings = this.getSettings();
-
-    this.api = new VoltieAPI({
-      ip: settings.ip,
-      port: settings.port,
-      username: settings.username?.length ? settings.username : undefined,
-      password: settings.password?.length ? settings.password : undefined
-    });
-
-    this.setMaxCurrentLimit(settings.maxCurrentLimit);
+    this.applaySettings(this.getSettings());
 
     console.log(await this.api.getStatus());
     console.log(await this.api.getPowerDetails());
@@ -54,16 +48,9 @@ module.exports = class VoltieDevice extends Homey.Device {
    * @param {string[]} event.changedKeys An array of keys changed since the previous version
    * @returns {Promise<string|void>} return a custom message that will be displayed
    */
-  async onSettings({
-    oldSettings,
-    newSettings,
-    changedKeys,
-  }: {
-    oldSettings: { [key: string]: boolean | string | number | undefined | null };
-    newSettings: { [key: string]: boolean | string | number | undefined | null };
-    changedKeys: string[];
-  }): Promise<string | void> {
+  async onSettings({ oldSettings, newSettings, changedKeys}: { oldSettings: any; newSettings: any; changedKeys: any;}): Promise<string | void> {
     this.log("VoltieDevice settings where changed");
+    this.applaySettings(newSettings);
   }
 
   /**
@@ -80,6 +67,17 @@ module.exports = class VoltieDevice extends Homey.Device {
    */
   async onDeleted() {
     this.log('VoltieDevice has been deleted');
+  }
+
+  applaySettings(newSettings: VoltieSettings){
+    if(this.api) this.api.destroy();
+    this.api = new VoltieAPI({
+      ip: newSettings.ip,
+      port: newSettings.port,
+      username: newSettings.username?.length ? newSettings.username : undefined,
+      password: newSettings.password?.length ? newSettings.password : undefined
+    });
+    this.setMaxCurrentLimit(newSettings.maxCurrentLimit);
   }
 
   setMaxCurrentLimit(limit: number){

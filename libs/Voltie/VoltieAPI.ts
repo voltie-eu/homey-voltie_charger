@@ -44,6 +44,10 @@ export default class VoltieAPI {
     this.axiosInstance = axios.create(axiosConfig);
   }
 
+  public destroy() {
+    // No persistent connections to clean up, but method is here for future use if needed
+  }
+
   async getApiVersion(): Promise<ApiVersionResponse> {
     try {
       const response = await this.axiosInstance.get<ApiVersionResponse>('/apiver');
