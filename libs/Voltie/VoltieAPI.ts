@@ -1,4 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import http from 'http';
+import https from 'https';
 import VoltieAPIError from './VoltieAPIError';
 import {
   ApiVersionResponse,
@@ -16,6 +18,8 @@ import {
 
 export default class VoltieAPI {
   private axiosInstance!: AxiosInstance;
+  private httpAgent?: http.Agent;
+  private httpsAgent?: https.Agent;
 
   private ip?: string;
   private port: number = 5059;
@@ -26,9 +30,15 @@ export default class VoltieAPI {
     this.port = config.port || 5059;
     this.timeout = config.timeout || 30000;
 
+    // Create dedicated agents to manage socket connections
+    this.httpAgent = new http.Agent({ keepAlive: false });
+    this.httpsAgent = new https.Agent({ keepAlive: false });
+
     const axiosConfig: any = {
       baseURL: `http://${this.ip}:${this.port}`,
       timeout: this.timeout,
+      httpAgent: this.httpAgent,
+      httpsAgent: this.httpsAgent,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -45,7 +55,13 @@ export default class VoltieAPI {
   }
 
   public destroy() {
-    // No persistent connections to clean up, but method is here for future use if needed
+    // Properly clean up socket connections and event listeners
+    if (this.httpAgent) {
+      this.httpAgent.destroy();
+    }
+    if (this.httpsAgent) {
+      this.httpsAgent.destroy();
+    }
   }
 
   async getApiVersion(): Promise<ApiVersionResponse> {

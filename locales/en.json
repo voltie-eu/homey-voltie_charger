@@ -21,5 +21,10 @@
             "next": "Add device",
             "already_added_device": "Device with hostname: [__host__] already paired with Homey!"
         }
+    },
+    "device": {
+        "unavailable": "Volty Charger is unavailable: [__error__]",
+        "max_retries_reached": "Max API retry limit exceeded. The app stopped querying after multiple failed attempts. Verify your Volty Charger settings and restart the application.",
+        "car_not_connected": "No car connected. Please connect a car to start charging."
     }
 }
