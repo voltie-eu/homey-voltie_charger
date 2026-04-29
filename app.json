@@ -153,13 +153,13 @@
             },
             "values": [
               {
-                "id": "on",
+                "id": "true",
                 "title": {
                   "en": "On"
                 }
               },
               {
-                "id": "off",
+                "id": "false",
                 "title": {
                   "en": "Off"
                 }
@@ -180,11 +180,30 @@
         "evcharger_charging",
         "autostart",
         "evcharger_charging_state",
+        "phase",
+        "charging_time",
         "meter_power",
         "measure_power",
         "measure_current",
         "current_limit"
       ],
+      "capabilitiesOptions": {
+        "meter_power": {
+          "title": {
+            "en": "Energy charged"
+          }
+        },
+        "measure_power": {
+          "title": {
+            "en": "Charging Power"
+          }
+        },
+        "measure_current": {
+          "title": {
+            "en": "Charging Current"
+          }
+        }
+      },
       "energy": {
         "evCharger": true,
         "meterPowerImportedCapability": "meter_power"
@@ -290,6 +309,16 @@
         "en": "Auto Start"
       }
     },
+    "charging_time": {
+      "type": "string",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "title": {
+        "en": "Charging Time"
+      },
+      "icon": "/drivers/voltie-charger/assets/icons/charging_time.svg"
+    },
     "current_limit": {
       "type": "enum",
       "title": {
@@ -299,6 +328,16 @@
       "getable": true,
       "setable": true,
       "uiComponent": "picker"
+    },
+    "phase": {
+      "type": "number",
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "title": {
+        "en": "Number of Phases"
+      },
+      "icon": "/drivers/voltie-charger/assets/icons/phase.svg"
     }
   },
   "discovery": {

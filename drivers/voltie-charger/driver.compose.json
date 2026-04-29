@@ -7,11 +7,30 @@
     "evcharger_charging",
     "autostart",
     "evcharger_charging_state",
+    "phase",
+    "charging_time",
     "meter_power",
     "measure_power",
     "measure_current",
     "current_limit"
   ],
+  "capabilitiesOptions": {
+    "meter_power": {
+      "title": {
+        "en": "Energy charged"
+       }
+    },
+    "measure_power": {
+      "title": {
+        "en": "Charging Power"
+       }
+    },
+    "measure_current": {
+      "title": {
+        "en": "Charging Current"
+       }
+    }
+  },
   "energy": {
     "evCharger": true,
     "meterPowerImportedCapability": "meter_power"

@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import http from 'http';
-import https from 'https';
 import VoltieAPIError from './VoltieAPIError';
 import {
   ApiVersionResponse,
@@ -19,7 +18,7 @@ import {
 export default class VoltieAPI {
   private axiosInstance!: AxiosInstance;
   private httpAgent?: http.Agent;
-  private httpsAgent?: https.Agent;
+  private abortControllers: Map<string, AbortController> = new Map();
 
   private ip?: string;
   private port: number = 5059;
@@ -30,15 +29,12 @@ export default class VoltieAPI {
     this.port = config.port || 5059;
     this.timeout = config.timeout || 30000;
 
-    // Create dedicated agents to manage socket connections
     this.httpAgent = new http.Agent({ keepAlive: false });
-    this.httpsAgent = new https.Agent({ keepAlive: false });
 
     const axiosConfig: any = {
       baseURL: `http://${this.ip}:${this.port}`,
       timeout: this.timeout,
       httpAgent: this.httpAgent,
-      httpsAgent: this.httpsAgent,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -55,34 +51,58 @@ export default class VoltieAPI {
   }
 
   public destroy() {
-    // Properly clean up socket connections and event listeners
-    if (this.httpAgent) {
-      this.httpAgent.destroy();
+    this.abortControllers.forEach((controller) => {
+      controller.abort();
+    });
+    this.abortControllers.clear();
+
+    if (this.httpAgent) this.httpAgent.destroy();
+  }
+
+  private getAbortSignal(endpoint: string): AbortSignal {
+    const existingController = this.abortControllers.get(endpoint);
+    if (existingController) {
+      existingController.abort();
     }
-    if (this.httpsAgent) {
-      this.httpsAgent.destroy();
-    }
+
+    const newController = new AbortController();
+    this.abortControllers.set(endpoint, newController);
+
+    return newController.signal;
+  }
+
+  private cleanupAbortController(endpoint: string): void {
+    this.abortControllers.delete(endpoint);
   }
 
   async getApiVersion(): Promise<ApiVersionResponse> {
+    const endpoint = '/apiver';
     try {
-      const response = await this.axiosInstance.get<ApiVersionResponse>('/apiver');
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.get<ApiVersionResponse>(endpoint, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async getStatus(): Promise<StatusResponse> {
+    const endpoint = '/status';
     try {
-      const response = await this.axiosInstance.get<StatusResponse>('/status');
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.get<StatusResponse>(endpoint, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async startCharging(params?: StartChargingParams): Promise<StartChargingResponse> {
+    const endpoint = '/start';
     try {
       const queryParams = new URLSearchParams();
       if (params?.id_tag) {
@@ -93,60 +113,82 @@ export default class VoltieAPI {
       }
 
       const query = queryParams.toString();
-      const endpoint = query ? `/start?${query}` : '/start';
+      const signal = this.getAbortSignal(endpoint);
 
-      const response = await this.axiosInstance.get<StartChargingResponse>(endpoint);
+      const response = await this.axiosInstance.get<StartChargingResponse>(query ? `${endpoint}?${query}` : endpoint, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async stopCharging(): Promise<StopChargingResponse> {
+    const endpoint = '/stop';
     try {
-      const response = await this.axiosInstance.get<StopChargingResponse>('/stop');
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.get<StopChargingResponse>(endpoint, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async getConfiguration(): Promise<ConfigResponse> {
+    const endpoint = '/config';
     try {
-      const response = await this.axiosInstance.get<ConfigResponse>('/config');
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.get<ConfigResponse>(endpoint, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async updateConfiguration(config: ConfigRequest): Promise<ConfigUpdateResponse> {
+    const endpoint = '/config';
     try {
-      const response = await this.axiosInstance.put<ConfigUpdateResponse>('/config', config);
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.put<ConfigUpdateResponse>(endpoint, config, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async getCDR(cdrId: number): Promise<GetCDRResponse> {
+    const endpoint = '/cdr';
     try {
       if (cdrId < 0) {
         throw new VoltieAPIError('INVALID_PARAM', 'CDR ID must be a positive number');
       }
 
-      const response = await this.axiosInstance.get<GetCDRResponse>(`/cdr?cdr_id=${cdrId}`);
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.get<GetCDRResponse>(`${endpoint}?cdr_id=${cdrId}`, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
 
   async getPowerDetails(): Promise<PowerResponse> {
+    const endpoint = '/power';
     try {
-      const response = await this.axiosInstance.get<PowerResponse>('/power');
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.get<PowerResponse>(endpoint, { signal });
+      this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {
+      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }
@@ -158,6 +200,13 @@ export default class VoltieAPI {
 
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
+
+      if (axiosError.code === 'ERR_CANCELED') {
+        return new VoltieAPIError(
+          'REQUEST_ABORTED',
+          'Request was cancelled due to a new request being made to the same endpoint',
+        );
+      }
 
       if (axiosError.response?.data) {
         const data = axiosError.response.data as any;

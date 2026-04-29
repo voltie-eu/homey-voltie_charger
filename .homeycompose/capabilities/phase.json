@@ -1,0 +1,10 @@
+{
+    "type": "number",
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "title": {
+        "en": "Number of Phases"
+    },
+    "icon": "/drivers/voltie-charger/assets/icons/phase.svg"
+}

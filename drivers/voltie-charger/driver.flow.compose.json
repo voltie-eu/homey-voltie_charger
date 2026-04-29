@@ -69,8 +69,8 @@
             "en": "On/Off"
           },
           "values": [
-            { "id": "on", "title": { "en": "On" } },
-            { "id": "off", "title": { "en": "Off" } }
+            { "id": "true", "title": { "en": "On" } },
+            { "id": "false", "title": { "en": "Off" } }
           ]
         }
       ]

@@ -1,0 +1,10 @@
+{
+    "type": "string",
+    "getable": true,
+    "setable": false,
+    "uiComponent": "sensor",
+    "title": {
+        "en": "Charging Time"
+    },
+    "icon": "/drivers/voltie-charger/assets/icons/charging_time.svg"
+}

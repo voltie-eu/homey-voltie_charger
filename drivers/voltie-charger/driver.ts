@@ -1,5 +1,6 @@
 import Homey, { DiscoveryResultMDNSSD } from 'homey';
 import { PairSession } from 'homey/lib/Driver';
+import VoltieDevice from './device';
 
 export interface VoltieData{
   id: string; // The device hostname
@@ -11,19 +12,29 @@ export interface VoltieSettings{
   username?: string;
   password?: string;
 }
-export interface VoltieDevice {
+export interface VoltieDeviceProps {
   name: string;
   data: VoltieData;
   settings: VoltieSettings;
 }
 
-module.exports = class VoltieDriver extends Homey.Driver {
+export default class VoltieDriver extends Homey.Driver {
+  currentLimitTriggerCard!: Homey.FlowCardTriggerDevice;
+  autostartTriggerCard!: Homey.FlowCardTriggerDevice;
 
   /**
    * onInit is called when the driver is initialized.
    */
   async onInit() {
     this.log('VoltieDriver has been initialized');
+
+    this.registerCapabilityCondition('autostart');
+
+    this.registerCapabilityAction('set_current_limit', 'onCurrentLimitChanged', 'current_limit');
+    this.registerCapabilityAction('set_autostart', 'onAutostartChanged', 'autostart');
+
+    this.currentLimitTriggerCard = this.homey.flow.getDeviceTriggerCard('current_limit_changed');
+    this.autostartTriggerCard = this.homey.flow.getDeviceTriggerCard('autostart_changed');
   }
 
   async onPair(session: PairSession) {
@@ -44,12 +55,12 @@ module.exports = class VoltieDriver extends Homey.Driver {
             settings: {
               ip: device.address
             },
-          } as VoltieDevice;
+          } as VoltieDeviceProps;
         }),
       );
     });
 
-    session.setHandler('list_devices_selection', async (devices: VoltieDevice[]) => {
+    session.setHandler('list_devices_selection', async (devices: VoltieDeviceProps[]) => {
       selectedDevice = devices[0];
     });
 
@@ -57,14 +68,14 @@ module.exports = class VoltieDriver extends Homey.Driver {
       return selectedDevice;
     });
 
-    session.setHandler('get_new_device', async (device: VoltieDevice) => {
+    session.setHandler('get_new_device', async (device: VoltieDeviceProps) => {
       return this.getNewDevices([device])[0];
     });
   }
 
-  getNewDevices(discoveredDevices:VoltieDevice[]) {
+  getNewDevices(discoveredDevices:VoltieDeviceProps[]) {
     const pairedDevices = Object.values(this.getDevices());
-    const newDevices:VoltieDevice[] = [];
+    const newDevices:VoltieDeviceProps[] = [];
 
     let newDevice = true;
     discoveredDevices.forEach(discoveredDevice => {
@@ -80,4 +91,22 @@ module.exports = class VoltieDriver extends Homey.Driver {
 
     return newDevices;
   }
+
+  registerCapabilityCondition(capability: string) {
+    this.homey.flow.getConditionCard(capability).registerRunListener(async (args: any, state: any) => {
+      return (args.device as VoltieDevice).getCapabilityValue(capability);
+    });
+  }
+
+  registerCapabilityAction(capability: string, listener: string, valueName: string | string[]) {
+    this.homey.flow.getActionCard(capability).registerRunListener(async (args: any, state: any) => {
+      const values = [];
+      if(Array.isArray(valueName)) valueName.forEach(v => values.push(args[v]));
+      else values.push(args[valueName]);
+      
+      (args.device[listener] as Function).apply(args.device, values);
+    })
+  }
 };
+
+module.exports = VoltieDriver;

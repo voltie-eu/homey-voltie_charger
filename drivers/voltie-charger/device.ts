@@ -1,10 +1,12 @@
 import Homey from 'homey';
 import VoltieAPI from '../../libs/Voltie/VoltieAPI';
 import VoltieAPIError from '../../libs/Voltie/VoltieAPIError';
-import { VoltieSettings } from './driver';
-import { EVSEState, StatusResponse, PowerResponse, ConfigResponse, GetCDRResponse } from '../../libs/Voltie/VoltieAPITypes';
+import VoltieDriver, { VoltieSettings } from './driver';
+import { EVSEState, StatusResponse, ConfigResponse } from '../../libs/Voltie/VoltieAPITypes';
 
-module.exports = class VoltieDevice extends Homey.Device {
+export default class VoltieDevice extends Homey.Device {
+  driver!: VoltieDriver;
+
   private readonly MAX_API_RETRIES = 60;
   private readonly FAST_POLLING_INTERVAL = 3000;
   private readonly SLOW_POLLING_INTERVAL = 9000;
@@ -15,10 +17,10 @@ module.exports = class VoltieDevice extends Homey.Device {
 
   private latest: {
     status: StatusResponse | null;
-    CDR: GetCDRResponse | null;
     config: ConfigResponse | null;
-  } = { status: null, CDR: null, config: null };
+  } = { status: null, config: null };
 
+  // Device lifecycle methods
   async onInit(): Promise<void> {
     this.log('VoltieDevice has been initialized');
 
@@ -26,7 +28,7 @@ module.exports = class VoltieDevice extends Homey.Device {
     this.registerCapabilityListener('autostart', this.onAutostartChanged.bind(this));
     this.registerCapabilityListener('current_limit', this.onCurrentLimitChanged.bind(this));
     
-    await this.startPolling(this.getSettings());
+    this.startPolling(this.getSettings());
   }
 
   async onAdded(): Promise<void> {
@@ -36,7 +38,7 @@ module.exports = class VoltieDevice extends Homey.Device {
   async onSettings({ oldSettings, newSettings, changedKeys }: { oldSettings: any; newSettings: any; changedKeys: string[] }): Promise<string | void> {
     this.log('VoltieDevice settings were changed', changedKeys);
 
-    await this.startPolling(newSettings);
+    this.startPolling(newSettings);
   }
 
   async onRenamed(name: string): Promise<void> {
@@ -50,54 +52,70 @@ module.exports = class VoltieDevice extends Homey.Device {
     if (this.api) await this.api.destroy();
   }
 
-  // Device settings listeners
-  async onEVChargerChargingChanged(value: boolean): Promise<void> {
+  // Device capability listeners
+  onEVChargerChargingChanged(value: boolean): void {
+    this.log('Charging changed:', value);
+
     if(!this.latest.status?.is_car_connected) {
       throw new Error('Car is not connected');
     }
 
-    try {
-      this.log('Charging changed:', value);
+    (value ? this.api.startCharging() : this.api.stopCharging()).then(() => {
+      this.log('Charging control request completed successfully');
+      this.pollLatest(1000);
+    }).catch((error) => {
+      if (error.code === 'REQUEST_ABORTED') {
+        this.log('Charging control request was aborted');
+        return;
+      }
 
-      if (value) await this.api.startCharging();
-      else await this.api.stopCharging();
-
-      return this.pollLatest();
-    } catch (error) {
       this.error('Failed to control charging:', error);
       throw error;
-    }
+    });
   }
 
-  async onAutostartChanged(value: boolean): Promise<void> {
-    try {
-      this.log('Autostart changed:', value);
-      await this.api.updateConfiguration({ conf_autostart_enabled: value });
-      
-      return this.pollLatest();
-    } catch (error) {
-      this.error('Failed to set autostart:', error);
-      throw error;
-    }
+  onAutostartChanged(value: boolean): void {
+    this.log('Autostart changed:', value);
+
+    this.api.updateConfiguration({ conf_autostart_enabled: typeof value !== 'boolean' ? value === 'true' : value })
+      .then(() => {
+        this.log('Autostart updated successfully');
+        this.pollLatest(1000);
+      })
+      .catch((error) => {
+        if (error.code === 'REQUEST_ABORTED') {
+          this.log('Autostart update request was aborted');
+          return;  
+        }
+
+        this.error('Failed to set autostart:', error);
+        throw error;
+      });
   }
 
-  async onCurrentLimitChanged(value: string): Promise<void> {
-    try {
-      this.log('Current limit changed:', parseInt(value, 10));
-      await this.api.updateConfiguration({ conf_current_limit: parseInt(value, 10) });
-      
-      return this.pollLatest();
-    } catch (error) {
+  onCurrentLimitChanged(value: string): void {
+    this.log('Current limit changed:', parseInt(value, 10));
+
+    this.api.updateConfiguration({ conf_current_limit: parseInt(value, 10) }).then(() => {
+      this.log('Current limit updated successfully');
+      this.pollLatest(1000);
+    }).catch((error) => {
+      if (error.code === 'REQUEST_ABORTED') {
+        this.log('Current limit update request was aborted');
+        return;
+      }
+
       this.error('Failed to set current limit:', error);
       throw error;
-    }
+    });
   }
 
-  // Pooling and state management
-  private async startPolling(newSettings: VoltieSettings): Promise<void> {
+  // Pooling methods
+  private startPolling(newSettings: VoltieSettings): void {
     this.stopPolling();
 
-    if (this.api) await this.api.destroy();
+    if (this.api) this.api.destroy();
+
     this.api = new VoltieAPI({
       ip: newSettings.ip,
       port: newSettings.port || 5059,
@@ -107,45 +125,40 @@ module.exports = class VoltieDevice extends Homey.Device {
     
     this.setMaxCurrentLimit(newSettings.maxCurrentLimit);
     
-    await this.pollLatest();
+    this.pollLatest();
   }
 
-  private async pollLatest(): Promise<void> {
+  private async pollLatest(delay: number = 0): Promise<void> {
     this.stopPolling();
+
+    if(delay) await new Promise(resolve => this.pollingTimer = this.homey.setTimeout(resolve, delay));
 
     try {
       this.latest.status = await this.api.getStatus();
       this.latest.config = await this.api.getConfiguration();
-      if (this.latest.status.is_charging) this.latest.CDR = await this.api.getCDR(this.latest.status.last_cdr);
-
+      
       this.apiError = 0;
-      await this.setAvailable();
-    } catch (error) {
-      if (++this.apiError < this.MAX_API_RETRIES){
-        await this.setUnavailable(this.homey.__('device.unavailable', { error }));
-        this.pollingTimer = this.homey.setTimeout(this.pollLatest.bind(this), this.apiError * 1000);
-      } else await this.setUnavailable(this.homey.__('device.max_retries_reached'));
+      if(!this.getAvailable()) await this.setAvailable();
+    } catch (error: VoltieAPIError | any) {
+      if (error.code !== 'REQUEST_ABORTED') {
+        if (++this.apiError < this.MAX_API_RETRIES){
+          this.log(`API error occurred (attempt ${this.apiError}/${this.MAX_API_RETRIES}):`, error);
+          await this.setUnavailable(this.homey.__('device.unavailable', { error }));
+
+          this.pollingTimer = this.homey.setTimeout(this.pollLatest.bind(this), this.FAST_POLLING_INTERVAL + this.apiError * 1000);
+        } else {
+          this.error(`Maximum API retry attempts reached (${this.MAX_API_RETRIES}). Stopping polling.`);
+          await this.setUnavailable(this.homey.__('device.max_retries_reached'));
+        }
+      } else {
+        this.log('Polling request was aborted');
+      }
 
       return Promise.resolve();
-    } 
-
-    if(this.latest.status){
-      this.updateCapabilityValue('evcharger_charging', this.latest.status.is_charging);
-      this.updateCapabilityValue('evcharger_charging_state', this.getEVState(this.latest.status));
-      this.updateCapabilityValue('measure_power', this.latest.status.charge_power);
-      this.updateCapabilityValue('measure_current', this.latest.status.charge_current);
     }
 
-    if(this.latest.CDR) {
-      this.updateCapabilityValue('meter_power', this.latest.CDR.cdr.chg_energy.toString());
-    }
-    
-    if(this.latest.config) {
-      this.updateCapabilityValue('autostart', !!this.latest.config.conf_autostart_enabled);
-      this.updateCapabilityValue('current_limit', this.latest.config.conf_current_limit.toString());
-    }
-
-    this.pollingTimer = this.homey.setTimeout(this.pollLatest.bind(this), this.latest.status.is_car_connected ? this.FAST_POLLING_INTERVAL : this.SLOW_POLLING_INTERVAL);
+    this.updateCapabilitiesFromLatest();
+    this.pollingTimer = this.homey.setTimeout(this.pollLatest.bind(this), this.latest.status?.is_car_connected ? this.FAST_POLLING_INTERVAL : this.SLOW_POLLING_INTERVAL);
 
     return Promise.resolve();
   }
@@ -156,13 +169,38 @@ module.exports = class VoltieDevice extends Homey.Device {
   }
 
   // Helper methods
-  private async updateCapabilityValue(capabilityId: string, value: any): Promise<void> {
+  private updateCapabilitiesFromLatest(): void {
+    if(this.latest.status){
+      this.updateCapabilityValue('evcharger_charging', this.latest.status.is_charging);
+      this.updateCapabilityValue('evcharger_charging_state', this.getEVState(this.latest.status));
+      this.updateCapabilityValue('measure_power', this.latest.status.charge_power * 1000);
+      this.updateCapabilityValue('measure_current', this.latest.status.charge_current);
+
+      if(this.latest.status.cdr) {
+        this.updateCapabilityValue('meter_power', this.latest.status.cdr.chg_energy);
+        this.updateCapabilityValue('charging_time', new Date(this.latest.status.cdr.chg_time * 1000).toISOString().substr(11, 8));
+        this.updateCapabilityValue('phase', this.latest.status.cdr.phase);
+      } else{
+        this.updateCapabilityValue('meter_power', 0);
+        this.updateCapabilityValue('charging_time', '00:00:00');
+      }
+    }
+    
+    if(this.latest.config) {
+      this.updateCapabilityValue('autostart', !!this.latest.config.conf_autostart_enabled);
+      this.updateCapabilityValue('current_limit', this.latest.config.conf_current_limit.toString());
+
+      //this.driver.autostartTriggerCard.trigger(this, { autostart: !!this.latest.config.conf_autostart_enabled }, {}).catch(this.error);
+      //this.driver.currentLimitTriggerCard.trigger(this, { current_limit: this.latest.config.conf_current_limit }, {}).catch(this.error);
+    }
+  }
+
+  private updateCapabilityValue(capabilityId: string, value: any): void {
     if(this.hasCapability(capabilityId) && value !== null && value !== undefined) {
-      return await this.setCapabilityValue(capabilityId, value).catch((error) => {
+      this.setCapabilityValue(capabilityId, value).catch((error) => {
         this.error(`Failed to update capability ${capabilityId} to:`, value, error);
       });
     }
-    return Promise.resolve();
   }
 
   private setMaxCurrentLimit(limit: number): void {
@@ -196,3 +234,5 @@ module.exports = class VoltieDevice extends Homey.Device {
     return 'plugged_in';
   }
 };
+
+module.exports = VoltieDevice;
