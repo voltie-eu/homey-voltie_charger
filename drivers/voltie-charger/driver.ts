@@ -30,8 +30,8 @@ export default class VoltieDriver extends Homey.Driver {
 
     this.registerCapabilityCondition('autostart');
 
-    this.registerCapabilityAction('set_current_limit', 'onCurrentLimitChanged', 'current_limit');
-    this.registerCapabilityAction('set_autostart', 'onAutostartChanged', 'autostart');
+    this.registerCapabilityAction('set_current_limit', 'setCurrentLimit', 'current_limit');
+    this.registerCapabilityAction('set_autostart', 'setAutostart', 'autostart');
 
     this.currentLimitTriggerCard = this.homey.flow.getDeviceTriggerCard('current_limit_changed');
     this.autostartTriggerCard = this.homey.flow.getDeviceTriggerCard('autostart_changed');

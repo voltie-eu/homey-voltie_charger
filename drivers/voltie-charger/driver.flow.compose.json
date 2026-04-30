@@ -41,7 +41,10 @@
     {
       "id": "set_current_limit",
       "title": {
-          "en": "Set current limit to [[current_limit]]A"
+          "en": "Set current limit to..."
+      },
+      "titleFormatted": {
+        "en": "Set current limit to [[current_limit]]A"
       },
       "args": [
         {
@@ -59,7 +62,10 @@
     {
       "id": "set_autostart",
       "title": {
-          "en": "Set Auto Start to [[autostart]]"
+          "en": "Set Auto Start to..."
+      },
+      "titleFormatted": {
+        "en": "Set Auto Start to [[autostart]]"
       },
       "args": [
         {

@@ -17,7 +17,7 @@ import {
 
 export default class VoltieAPI {
   private axiosInstance!: AxiosInstance;
-  private httpAgent?: http.Agent;
+  private httpAgent!: http.Agent;
   private abortControllers: Map<string, AbortController> = new Map();
 
   private ip?: string;
@@ -55,8 +55,7 @@ export default class VoltieAPI {
       controller.abort();
     });
     this.abortControllers.clear();
-
-    if (this.httpAgent) this.httpAgent.destroy();
+    this.httpAgent.destroy();
   }
 
   private getAbortSignal(endpoint: string): AbortSignal {
