@@ -1,5 +1,8 @@
 {
   "1.0.0": {
     "en": "First version!"
+  },
+  "1.0.1": {
+    "en": "Fix 'Set Auto Start to ...' flow action card"
   }
 }
