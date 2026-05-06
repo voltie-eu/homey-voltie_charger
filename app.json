@@ -308,21 +308,21 @@
   "capabilities": {
     "autostart": {
       "type": "boolean",
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle",
       "title": {
         "en": "Auto Start"
-      }
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
     },
     "charging_time": {
       "type": "string",
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
       "title": {
         "en": "Charging Time"
       },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
       "icon": "/drivers/voltie-charger/assets/icons/charging_time.svg"
     },
     "current_limit": {
@@ -337,12 +337,12 @@
     },
     "phase": {
       "type": "number",
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
       "title": {
         "en": "Number of Phases"
       },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
       "icon": "/drivers/voltie-charger/assets/icons/phase.svg"
     }
   },

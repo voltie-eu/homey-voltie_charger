@@ -57,15 +57,37 @@ export default class VoltieDevice extends Homey.Device {
 
   // Device capability listeners
   private async onEVChargerChargingChanged(value: boolean): Promise<void> {
-    return this.setEVCharging(value);
+    if(!this.latestValues.status?.is_car_connected) {
+      throw new Error(this.homey.__('device.car_not_connected'));
+    }
+
+    try {
+      await (value ? this.api.startCharging() : this.api.stopCharging());
+      this.pollLatest(2000);
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.cant_control_charging', { error }));
+    }
   }
 
   private async onAutostartChanged(value: boolean): Promise<void> {
-    return this.setAutostart(value);
+    try {
+      await this.api.updateConfiguration({ conf_autostart_enabled: value });
+      this.pollLatest(2000);
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.cant_set_autostart', { error }));
+    }
   }
 
   private async onCurrentLimitChanged(value: string): Promise<void> {
-    return this.setCurrentLimit(parseInt(value, 10));
+    try {
+      await this.api.updateConfiguration({ conf_current_limit: parseInt(value, 10) });
+      this.pollLatest(2000);
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.cant_set_current_limit', { error }));
+    }
   }
 
   // Pooling methods
@@ -127,38 +149,12 @@ export default class VoltieDevice extends Homey.Device {
   }
 
   // Setters
-  public async setEVCharging(value: boolean): Promise<void> {
-    if(!this.latestValues.status?.is_car_connected) {
-      throw new Error(this.homey.__('device.car_not_connected'));
-    }
-
-    try {
-      await (value ? this.api.startCharging() : this.api.stopCharging());
-      this.pollLatest(2000);
-    } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.cant_control_charging', { error }));
-    }
-  }
-
-  public async setAutostart(value: boolean): Promise<void> {
-    try {
-      await this.api.updateConfiguration({ conf_autostart_enabled: value });
-      this.pollLatest(2000);
-    } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.cant_set_autostart', { error }));
-    }
+  public async setAutostart(value: string): Promise<void> {
+    return this.onAutostartChanged(value === 'true');
   }
 
   public async setCurrentLimit(value: number): Promise<void> {
-    try {
-      await this.api.updateConfiguration({ conf_current_limit: value });
-      this.pollLatest(2000);
-    } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.cant_set_current_limit', { error }));
-    }
+    return this.onCurrentLimitChanged(value.toString());
   }
 
   // Helper methods
