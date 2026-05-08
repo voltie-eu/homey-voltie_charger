@@ -2,7 +2,7 @@ import Homey from 'homey';
 import VoltieAPI from '../../libs/Voltie/VoltieAPI';
 import VoltieAPIError from '../../libs/Voltie/VoltieAPIError';
 import VoltieDriver, { VoltieSettings } from './driver';
-import { EVSEState, StatusResponse, ConfigResponse } from '../../libs/Voltie/VoltieAPITypes';
+import { StatusResponse, ConfigResponse } from '../../libs/Voltie/VoltieAPITypes';
 
 export default class VoltieDevice extends Homey.Device {
   driver!: VoltieDriver;
@@ -157,6 +157,15 @@ export default class VoltieDevice extends Homey.Device {
     return this.onCurrentLimitChanged(value.toString());
   }
 
+  // Getters
+  public getAutostart(): boolean {
+    return this.latestValues.config?.conf_autostart_enabled || false;
+  }
+
+  public getIsCarConnected(): boolean {
+    return this.latestValues.status?.is_car_connected || false;
+  }
+
   // Helper methods
   private updateCapabilityValues(): void {
     if(this.latestValues.status){
@@ -222,15 +231,15 @@ export default class VoltieDevice extends Homey.Device {
       return 'plugged_out';
     }
 
+    if (latest.is_car_connected && this.previousCapabilityValues.get('evcharger_charging_state') === 'plugged_out') {
+      return 'plugged_in';
+    }
+
     if (latest.is_charging) {
       return 'plugged_in_charging';
     }
 
-    if (latest.evse_state === EVSEState.CONNECTED_CHARGING_READY || latest.evse_state === EVSEState.CONNECTED_NOT_CHARGING) {
-      return 'plugged_in_paused';
-    }
-
-    return 'plugged_in';
+    return 'plugged_in_paused';
   }
 };
 

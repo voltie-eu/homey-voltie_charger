@@ -108,6 +108,19 @@
             "filter": "driver_id=voltie-charger"
           }
         ]
+      },
+      {
+        "id": "is_car_connected",
+        "title": {
+          "en": "Is !{{plugged in| unplugged}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
       }
     ],
     "actions": [

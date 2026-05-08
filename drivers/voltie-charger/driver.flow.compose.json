@@ -35,6 +35,12 @@
       "title": {
           "en": "Auto Start is turned !{{on|off}}"
       }
+    },
+    {
+      "id": "is_car_connected",
+      "title": {
+          "en": "Is !{{plugged in| unplugged}}"
+      }
     }
   ],
   "actions": [

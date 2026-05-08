@@ -28,10 +28,11 @@ export default class VoltieDriver extends Homey.Driver {
   async onInit() {
     this.log('VoltieDriver has been initialized');
 
-    this.registerCapabilityCondition('autostart');
+    this.registerConditionListener('autostart', 'getAutostart');
+    this.registerConditionListener('is_car_connected', 'getIsCarConnected');
 
-    this.registerCapabilityAction('set_current_limit', 'setCurrentLimit', 'current_limit');
     this.registerCapabilityAction('set_autostart', 'setAutostart', 'autostart');
+    this.registerCapabilityAction('set_current_limit', 'setCurrentLimit', 'current_limit');
 
     this.currentLimitTriggerCard = this.homey.flow.getDeviceTriggerCard('current_limit_changed');
     this.autostartTriggerCard = this.homey.flow.getDeviceTriggerCard('autostart_changed');
@@ -92,9 +93,9 @@ export default class VoltieDriver extends Homey.Driver {
     return newDevices;
   }
 
-  registerCapabilityCondition(capability: string) {
-    this.homey.flow.getConditionCard(capability).registerRunListener(async (args: any, state: any) => {
-      return (args.device as VoltieDevice).getCapabilityValue(capability);
+  registerConditionListener(condition: string, listener: string) {
+    this.homey.flow.getConditionCard(condition).registerRunListener(async (args: any, state: any) => {
+      return (args.device[listener] as Function).apply(args.device);
     });
   }
 
