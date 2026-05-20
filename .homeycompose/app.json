@@ -1,5 +1,5 @@
 {
-  "id": "eu.voltie.homey",
+  "id": "eu.voltie.charger",
   "version": "1.0.2",
   "compatibility": ">=12.13.0",
   "sdk": 3,

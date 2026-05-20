@@ -1,5 +1,5 @@
 {
-  "name": "com.heszi.voltie",
+  "name": "eu.voltie.charger",
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
