@@ -4,6 +4,15 @@ import VoltieAPIError from '../../libs/Voltie/VoltieAPIError';
 import VoltieDriver, { VoltieSettings } from './driver';
 import { StatusResponse, ConfigResponse } from '../../libs/Voltie/VoltieAPITypes';
 
+export interface IKeyValue { 
+  [key: string]: any
+};
+
+export interface ICapabilityList{
+  id: string;
+  options?: IKeyValue;
+}
+
 export default class VoltieDevice extends Homey.Device {
   driver!: VoltieDriver;
 
@@ -24,6 +33,29 @@ export default class VoltieDevice extends Homey.Device {
   // Device lifecycle methods
   async onInit(): Promise<void> {
     this.log('VoltieDevice has been initialized');
+
+    await this.setupCapabilites([
+      { id: 'phase' }, // Renamed to 'active_phases' in v1.0.3
+    ], [
+      { id: 'evcharger_charging' },
+      { id: 'autostart' },
+      { id: 'evcharger_charging_state' },
+      { id: 'active_phases' },
+      { id: 'charging_time' },
+      { id: 'meter_power', options: {
+          title: { en: this.homey.__('device.capabilites.meter_power') }
+        }
+      },
+      { id: 'measure_power', options: {
+          title: { en: this.homey.__('device.capabilites.measure_power') }
+        } 
+      },
+      { id: 'measure_current', options: {
+          title: { en: this.homey.__('device.capabilites.measure_current') }
+        }
+      },
+      { id: 'current_limit' }
+    ]);
 
     this.registerCapabilityListener('evcharger_charging', this.onEVChargerChargingChanged.bind(this));
     this.registerCapabilityListener('autostart', this.onAutostartChanged.bind(this));
@@ -58,7 +90,7 @@ export default class VoltieDevice extends Homey.Device {
   // Device capability listeners
   private async onEVChargerChargingChanged(value: boolean): Promise<void> {
     if(!this.latestValues.status?.is_car_connected) {
-      throw new Error(this.homey.__('device.car_not_connected'));
+      throw new Error(this.homey.__('device.error.car_not_connected'));
     }
 
     try {
@@ -66,7 +98,7 @@ export default class VoltieDevice extends Homey.Device {
       this.pollLatest(2000);
     } catch (error: VoltieAPIError | any) {
       if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.cant_control_charging', { error }));
+      throw new Error(this.homey.__('device.error.cant_control_charging', { error }));
     }
   }
 
@@ -76,7 +108,7 @@ export default class VoltieDevice extends Homey.Device {
       this.pollLatest(2000);
     } catch (error: VoltieAPIError | any) {
       if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.cant_set_autostart', { error }));
+      throw new Error(this.homey.__('device.error.cant_set_autostart', { error }));
     }
   }
 
@@ -86,7 +118,7 @@ export default class VoltieDevice extends Homey.Device {
       this.pollLatest(2000);
     } catch (error: VoltieAPIError | any) {
       if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.cant_set_current_limit', { error }));
+      throw new Error(this.homey.__('device.error.cant_set_current_limit', { error }));
     }
   }
 
@@ -123,12 +155,12 @@ export default class VoltieDevice extends Homey.Device {
       if (error.code !== 'REQUEST_ABORTED') {
         if (++this.apiError < this.MAX_API_RETRIES){
           this.log(`API error occurred (attempt ${this.apiError}/${this.MAX_API_RETRIES}):`, error);
-          await this.setUnavailable(this.homey.__('device.unavailable', { error }));
+          await this.setUnavailable(this.homey.__('device.error.unavailable', { error }));
 
           this.pollLatest(this.FAST_POLLING_INTERVAL + this.apiError * 1000);
         } else {
           this.error(`Maximum API retry attempts reached (${this.MAX_API_RETRIES}). Stopping polling.`);
-          await this.setUnavailable(this.homey.__('device.max_retries_reached'));
+          await this.setUnavailable(this.homey.__('device.error.max_retries_reached'));
         }
       } else {
         this.log('Polling request was aborted');
@@ -173,7 +205,7 @@ export default class VoltieDevice extends Homey.Device {
       this.updateCapabilityValue('evcharger_charging_state', this.mapEVState(this.latestValues.status));
       this.updateCapabilityValue('measure_power', this.latestValues.status.charge_power * 1000);
       this.updateCapabilityValue('measure_current', this.latestValues.status.charge_current);
-      this.updateCapabilityValue('phase', this.latestValues.status.phases);
+      this.updateCapabilityValue('active_phases', this.latestValues.status.phases);
 
       if(this.latestValues.status.cdr) {
         this.updateCapabilityValue('meter_power', this.latestValues.status.cdr.chg_energy);
@@ -240,6 +272,19 @@ export default class VoltieDevice extends Homey.Device {
     }
 
     return 'plugged_in_paused';
+  }
+
+  private async setupCapabilites(remove: ICapabilityList[], add: ICapabilityList[]) {
+    for (const cap of remove){
+      if (this.hasCapability(cap.id)) await this.removeCapability(cap.id);
+    }
+
+    for (const cap of add){
+      if (!this.hasCapability(cap.id)){
+        await this.addCapability(cap.id);
+        if(cap.options) await this.setCapabilityOptions(cap.id, cap.options);
+      }
+    }
   }
 };
 

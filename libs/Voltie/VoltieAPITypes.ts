@@ -37,6 +37,13 @@ export enum CDRPeriodStopEvent {
   HTTP_API_CALL = 32,
 }
 
+export enum ForceSinglePhaseMode {
+  DISABLED = 0,
+  ENABLED = 1,
+  NOT_SUPPORTED = 2,
+  UNKNOWN = 3,
+}
+
 export interface ApiVersionResponse {
   api_files_version: number;
   response_time_ms: number;
@@ -175,6 +182,7 @@ export interface ConfigResponse {
   conf_front_led_enabled: boolean;
   conf_rear_led_enabled: boolean;
   conf_buzzer_enabled: boolean;
+  conf_force_single_phase: ForceSinglePhaseMode;
   response_time_ms: number;
   error_code: ErrorCode;
 }
@@ -186,6 +194,7 @@ export interface ConfigRequest {
   conf_front_led_enabled?: boolean;
   conf_rear_led_enabled?: boolean;
   conf_buzzer_enabled?: boolean;
+  conf_force_single_phase?: ForceSinglePhaseMode;
 }
 
 export interface ConfigUpdateResponse {
