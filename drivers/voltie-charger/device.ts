@@ -35,29 +35,9 @@ export default class VoltieDevice extends Homey.Device {
     this.log('VoltieDevice has been initialized');
 
     await this.setupCapabilites([
-      { id: 'phase' }, // Renamed to 'active_phases' in v1.0.3
+      { id: 'phase' }, // Renamed to 'active_phases' in v1.1
     ], [
-      { id: 'evcharger_charging' },
-      { id: 'front_led' },
-      { id: 'rear_led' },
-      { id: 'autostart' },
-      { id: 'force_single_phase' },
-      { id: 'current_limit' },
-      { id: 'evcharger_charging_state' },
-      { id: 'active_phases' },
-      { id: 'charging_time' },
-      { id: 'meter_power', options: {
-          title: { en: this.homey.__('device.capabilites.meter_power') }
-        }
-      },
-      { id: 'measure_power', options: {
-          title: { en: this.homey.__('device.capabilites.measure_power') }
-        } 
-      },
-      { id: 'measure_current', options: {
-          title: { en: this.homey.__('device.capabilites.measure_current') }
-        }
-      },
+      { id: 'active_phases' } // Renamed from 'phase' in v1.1
     ]);
 
     this.registerCapabilityListener('evcharger_charging', this.onEVChargerChargingChanged.bind(this));

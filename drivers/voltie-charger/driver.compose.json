@@ -3,7 +3,37 @@
     "en": "Voltie Charger"
   },
   "class": "evcharger",
-  "capabilities": [],
+  "capabilities": [
+    "evcharger_charging",
+    "front_led",
+    "rear_led",
+    "autostart",
+    "force_single_phase",
+    "current_limit",
+    "evcharger_charging_state",
+    "active_phases",
+    "charging_time",
+    "meter_power",
+    "measure_power",
+    "measure_current"
+  ],
+  "capabilitiesOptions": {
+    "meter_power": {
+      "title": {
+        "en": "Energy Charged"
+       }
+    },
+    "measure_power": {
+      "title": {
+        "en": "Charging Power"
+       }
+    },
+    "measure_current": {
+      "title": {
+        "en": "Charging Current"
+       }
+    }
+  },
   "energy": {
     "evCharger": true,
     "meterPowerImportedCapability": "meter_power"
