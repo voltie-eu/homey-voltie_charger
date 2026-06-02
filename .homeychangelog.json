@@ -7,5 +7,8 @@
   },
   "1.0.2": {
     "en": "Add 'Is plugged in' condition card"
+  },
+  "1.1.0": {
+    "en": "Add Force Single Phase, Front LED Enabled, Rear LED Enabled capabilities with related flow cards, and update Voltie brand assets"
   }
 }
