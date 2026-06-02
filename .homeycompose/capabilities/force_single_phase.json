@@ -1,10 +1,10 @@
 {
     "type": "boolean",
     "title": {
-        "en": "Auto Start Enabled"
+        "en": "Force Single Phase"
     },
     "getable": true,
     "setable": true,
     "uiComponent": "button",
-    "icon": "/drivers/voltie-charger/assets/icons/autostart.svg"
+    "icon": "/drivers/voltie-charger/assets/icons/phase.svg"
 }

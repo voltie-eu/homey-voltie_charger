@@ -27,6 +27,48 @@
           "example": true
         }
       ]
+    },
+    {
+      "id": "force_single_phase_changed",
+      "title": {
+          "en": "Force Single Phase changed"
+      },
+      "tokens": [
+        {
+          "name": "force_single_phase",
+          "title": { "en": "Force Single Phase" },
+          "type": "boolean",
+          "example": true
+        }
+      ]
+    },
+    {
+      "id": "front_led_changed",
+      "title": {
+          "en": "Front LED changed"
+      },
+      "tokens": [
+        {
+          "name": "front_led",
+          "title": { "en": "Front LED Enabled" },
+          "type": "boolean",
+          "example": true
+        }
+      ]
+    },
+    {
+      "id": "rear_led_changed",
+      "title": {
+          "en": "Rear LED changed"
+      },
+      "tokens": [
+        {
+          "name": "rear_led",
+          "title": { "en": "Rear LED Enabled" },
+          "type": "boolean",
+          "example": true
+        }
+      ]
     }
   ],
   "conditions": [
@@ -34,6 +76,24 @@
       "id": "autostart",
       "title": {
           "en": "Auto Start is turned !{{on|off}}"
+      }
+    },
+    {
+      "id": "force_single_phase",
+      "title": {
+          "en": "Force Single Phase is turned !{{on|off}}"
+      }
+    },
+    {
+      "id": "front_led",
+      "title": {
+          "en": "Front LED is turned !{{on|off}}"
+      }
+    },
+    {
+      "id": "rear_led",
+      "title": {
+          "en": "Rear LED is turned !{{on|off}}"
       }
     },
     {
@@ -77,6 +137,72 @@
         {
           "type": "dropdown",
           "name": "autostart",
+          "title": {
+            "en": "On/Off"
+          },
+          "values": [
+            { "id": "true", "title": { "en": "On" } },
+            { "id": "false", "title": { "en": "Off" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set_force_single_phase",
+      "title": {
+          "en": "Force Single Phase..."
+      },
+      "titleFormatted": {
+        "en": "Force Single Phase is [[force_single_phase]]"
+      },
+      "args": [
+        {
+          "type": "dropdown",
+          "name": "force_single_phase",
+          "title": {
+            "en": "On/Off"
+          },
+          "values": [
+            { "id": "true", "title": { "en": "On" } },
+            { "id": "false", "title": { "en": "Off" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set_front_led",
+      "title": {
+          "en": "Turn Front LED..."
+      },
+      "titleFormatted": {
+        "en": "Turn Front LED [[front_led]]"
+      },
+      "args": [
+        {
+          "type": "dropdown",
+          "name": "front_led",
+          "title": {
+            "en": "On/Off"
+          },
+          "values": [
+            { "id": "true", "title": { "en": "On" } },
+            { "id": "false", "title": { "en": "Off" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set_rear_led",
+      "title": {
+          "en": "Turn Rear LED..."
+      },
+      "titleFormatted": {
+        "en": "Turn Rear LED [[rear_led]]"
+      },
+      "args": [
+        {
+          "type": "dropdown",
+          "name": "rear_led",
           "title": {
             "en": "On/Off"
           },

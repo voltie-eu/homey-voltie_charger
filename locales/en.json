@@ -33,8 +33,11 @@
             "max_retries_reached": "Max API retry limit exceeded. The app stopped querying after multiple failed attempts. Verify your Volty Charger settings and restart the application.",
             "car_not_connected": "No car connected. Please connect a car to start charging.",
             "cant_control_charging": "Failed to control charging: [__error__]",
-            "cant_set_current_limit": "Failed to set current limit: [__error__]",
-            "cant_set_autostart": "Failed to set autostart: [__error__]"
+            "cant_set_autostart": "Failed to set autostart: [__error__]",
+            "cant_set_force_single_phase": "Failed to set force single phase: [__error__]",
+            "cant_set_front_led": "Failed to set front LED: [__error__]",
+            "cant_set_rear_led": "Failed to set rear LED: [__error__]",
+            "cant_set_current_limit": "Failed to set current limit: [__error__]"
         }
     }
 }

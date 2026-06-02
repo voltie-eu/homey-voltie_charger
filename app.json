@@ -93,6 +93,75 @@
             "filter": "driver_id=voltie-charger"
           }
         ]
+      },
+      {
+        "id": "force_single_phase_changed",
+        "title": {
+          "en": "Force Single Phase changed"
+        },
+        "tokens": [
+          {
+            "name": "force_single_phase",
+            "title": {
+              "en": "Force Single Phase"
+            },
+            "type": "boolean",
+            "example": true
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      },
+      {
+        "id": "front_led_changed",
+        "title": {
+          "en": "Front LED changed"
+        },
+        "tokens": [
+          {
+            "name": "front_led",
+            "title": {
+              "en": "Front LED Enabled"
+            },
+            "type": "boolean",
+            "example": true
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      },
+      {
+        "id": "rear_led_changed",
+        "title": {
+          "en": "Rear LED changed"
+        },
+        "tokens": [
+          {
+            "name": "rear_led",
+            "title": {
+              "en": "Rear LED Enabled"
+            },
+            "type": "boolean",
+            "example": true
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
       }
     ],
     "conditions": [
@@ -100,6 +169,45 @@
         "id": "autostart",
         "title": {
           "en": "Auto Start is turned !{{on|off}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      },
+      {
+        "id": "force_single_phase",
+        "title": {
+          "en": "Force Single Phase is turned !{{on|off}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      },
+      {
+        "id": "front_led",
+        "title": {
+          "en": "Front LED is turned !{{on|off}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
+      },
+      {
+        "id": "rear_led",
+        "title": {
+          "en": "Rear LED is turned !{{on|off}}"
         },
         "args": [
           {
@@ -167,6 +275,117 @@
           {
             "type": "dropdown",
             "name": "autostart",
+            "title": {
+              "en": "On/Off"
+            },
+            "values": [
+              {
+                "id": "true",
+                "title": {
+                  "en": "On"
+                }
+              },
+              {
+                "id": "false",
+                "title": {
+                  "en": "Off"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_force_single_phase",
+        "title": {
+          "en": "Force Single Phase..."
+        },
+        "titleFormatted": {
+          "en": "Force Single Phase is [[force_single_phase]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          },
+          {
+            "type": "dropdown",
+            "name": "force_single_phase",
+            "title": {
+              "en": "On/Off"
+            },
+            "values": [
+              {
+                "id": "true",
+                "title": {
+                  "en": "On"
+                }
+              },
+              {
+                "id": "false",
+                "title": {
+                  "en": "Off"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_front_led",
+        "title": {
+          "en": "Turn Front LED..."
+        },
+        "titleFormatted": {
+          "en": "Turn Front LED [[front_led]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          },
+          {
+            "type": "dropdown",
+            "name": "front_led",
+            "title": {
+              "en": "On/Off"
+            },
+            "values": [
+              {
+                "id": "true",
+                "title": {
+                  "en": "On"
+                }
+              },
+              {
+                "id": "false",
+                "title": {
+                  "en": "Off"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_rear_led",
+        "title": {
+          "en": "Turn Rear LED..."
+        },
+        "titleFormatted": {
+          "en": "Turn Rear LED [[rear_led]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          },
+          {
+            "type": "dropdown",
+            "name": "rear_led",
             "title": {
               "en": "On/Off"
             },
@@ -305,11 +524,12 @@
     "autostart": {
       "type": "boolean",
       "title": {
-        "en": "Auto Start"
+        "en": "Auto Start Enabled"
       },
       "getable": true,
       "setable": true,
-      "uiComponent": "toggle"
+      "uiComponent": "button",
+      "icon": "/drivers/voltie-charger/assets/icons/autostart.svg"
     },
     "charging_time": {
       "type": "string",
@@ -330,6 +550,36 @@
       "getable": true,
       "setable": true,
       "uiComponent": "picker"
+    },
+    "force_single_phase": {
+      "type": "boolean",
+      "title": {
+        "en": "Force Single Phase"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/drivers/voltie-charger/assets/icons/phase.svg"
+    },
+    "front_led": {
+      "type": "boolean",
+      "title": {
+        "en": "Front LED Enabled"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/drivers/voltie-charger/assets/icons/led.svg"
+    },
+    "rear_led": {
+      "type": "boolean",
+      "title": {
+        "en": "Rear LED Enabled"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/drivers/voltie-charger/assets/icons/led.svg"
     }
   },
   "discovery": {
