@@ -3,12 +3,12 @@
     {
       "id": "current_limit_changed",
       "title": {
-          "en": "Current limit changed"
+          "en": "'Current Limit' changed"
       },
       "tokens": [
         {
           "name": "current_limit",
-          "title": { "en": "Current limit" },
+          "title": { "en": "Current Limit" },
           "type": "number",
           "example": "6"
         }
