@@ -10,5 +10,8 @@
   },
   "1.1.0": {
     "en": "Add Force Single Phase, Front LED Enabled, Rear LED Enabled capabilities with related flow cards, and update Voltie brand assets"
+  },
+  "1.1.1": {
+    "en": "Fix flow cards grammar consistent"
   }
 }

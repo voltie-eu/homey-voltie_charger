@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "eu.voltie.charger",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "compatibility": ">=12.13.0",
   "sdk": 3,
   "runtime": "nodejs",
@@ -74,7 +74,7 @@
       {
         "id": "autostart_changed",
         "title": {
-          "en": "Auto Start changed"
+          "en": "'Auto Start' changed"
         },
         "tokens": [
           {
@@ -97,7 +97,7 @@
       {
         "id": "force_single_phase_changed",
         "title": {
-          "en": "Force Single Phase changed"
+          "en": "'Force Single Phase' changed"
         },
         "tokens": [
           {
@@ -120,7 +120,7 @@
       {
         "id": "front_led_changed",
         "title": {
-          "en": "Front LED changed"
+          "en": "'Front LED Enabled' changed"
         },
         "tokens": [
           {
@@ -143,7 +143,7 @@
       {
         "id": "rear_led_changed",
         "title": {
-          "en": "Rear LED changed"
+          "en": "'Rear LED Enabled' changed"
         },
         "tokens": [
           {
@@ -168,7 +168,7 @@
       {
         "id": "autostart",
         "title": {
-          "en": "Auto Start is turned !{{on|off}}"
+          "en": "'Auto Start' is turned !{{on|off}}"
         },
         "args": [
           {
@@ -181,7 +181,7 @@
       {
         "id": "force_single_phase",
         "title": {
-          "en": "Force Single Phase is turned !{{on|off}}"
+          "en": "'Force Single Phase' is turned !{{on|off}}"
         },
         "args": [
           {
@@ -194,7 +194,7 @@
       {
         "id": "front_led",
         "title": {
-          "en": "Front LED is turned !{{on|off}}"
+          "en": "'Front LED' is turned !{{on|off}}"
         },
         "args": [
           {
@@ -207,7 +207,7 @@
       {
         "id": "rear_led",
         "title": {
-          "en": "Rear LED is turned !{{on|off}}"
+          "en": "'Rear LED' is turned !{{on|off}}"
         },
         "args": [
           {
@@ -235,10 +235,10 @@
       {
         "id": "set_current_limit",
         "title": {
-          "en": "Set current limit to..."
+          "en": "Set 'Current Limit' to ..."
         },
         "titleFormatted": {
-          "en": "Set current limit to [[current_limit]]A"
+          "en": "Set 'Current Limit' to [[current_limit]]A"
         },
         "args": [
           {
@@ -250,7 +250,7 @@
             "type": "number",
             "name": "current_limit",
             "title": {
-              "en": "Current limit"
+              "en": "Current Limit"
             },
             "min": 6,
             "max": 32,
@@ -261,10 +261,10 @@
       {
         "id": "set_autostart",
         "title": {
-          "en": "Set Auto Start to..."
+          "en": "Set 'Auto Start' to ..."
         },
         "titleFormatted": {
-          "en": "Set Auto Start to [[autostart]]"
+          "en": "Set 'Auto Start' to [[autostart]]"
         },
         "args": [
           {
@@ -298,10 +298,10 @@
       {
         "id": "set_force_single_phase",
         "title": {
-          "en": "Force Single Phase..."
+          "en": "Set 'Force Single Phase' to ..."
         },
         "titleFormatted": {
-          "en": "Force Single Phase is [[force_single_phase]]"
+          "en": "Set 'Force Single Phase' to [[force_single_phase]]"
         },
         "args": [
           {
@@ -335,10 +335,10 @@
       {
         "id": "set_front_led",
         "title": {
-          "en": "Turn Front LED..."
+          "en": "Set 'Front LED' to ..."
         },
         "titleFormatted": {
-          "en": "Turn Front LED [[front_led]]"
+          "en": "Set 'Front LED' to [[front_led]]"
         },
         "args": [
           {
@@ -372,10 +372,10 @@
       {
         "id": "set_rear_led",
         "title": {
-          "en": "Turn Rear LED..."
+          "en": "Set 'Rear LED' to ..."
         },
         "titleFormatted": {
-          "en": "Turn Rear LED [[rear_led]]"
+          "en": "Set 'Rear LED' to [[rear_led]]"
         },
         "args": [
           {
