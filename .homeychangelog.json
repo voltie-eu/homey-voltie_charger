@@ -16,5 +16,8 @@
   },
   "1.1.2": {
     "en": "Fix flow cards grammar consistent"
+  },
+  "1.1.3": {
+    "en": "Update capabilities list"
   }
 }
