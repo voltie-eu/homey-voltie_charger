@@ -267,12 +267,7 @@ export default class VoltieDevice extends Homey.Device {
       this.updateCapabilityValue('evcharger_charging_state', this.mapEVState(this.latestValues.status));
       this.updateCapabilityValue('measure_power', this.latestValues.status.charge_power * 1000);
       this.updateCapabilityValue('measure_current', this.latestValues.status.charge_current);
-
-      if(this.latestValues.status.is_charging){
-        this.updateCapabilityValue('active_phases', this.latestValues.status.phases);
-      }else{
-        this.updateCapabilityValue('active_phases', 0);
-      }
+      this.updateCapabilityValue('active_phases', this.latestValues.status.phases_used);
       
       if(this.latestValues.status.cdr) {
         this.updateCapabilityValue('meter_power', this.latestValues.status.cdr.chg_energy);

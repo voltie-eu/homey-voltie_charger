@@ -118,6 +118,7 @@ export interface StatusResponse {
   autostart: boolean;
   mains_voltage: number;
   phases: number;
+  phases_used: number;
   current_offered: number;
   charge_current: number;
   charge_power: number;
