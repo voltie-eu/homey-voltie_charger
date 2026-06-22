@@ -19,5 +19,8 @@
   },
   "1.1.3": {
     "en": "Update capabilities list"
+  },
+  "1.1.4": {
+    "en": "Refactor VoltieDevice to use structured device values and enhance configuration management"
   }
 }
