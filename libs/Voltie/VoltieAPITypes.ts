@@ -184,6 +184,16 @@ export interface ConfigResponse {
   conf_rear_led_enabled: boolean;
   conf_buzzer_enabled: boolean;
   conf_force_single_phase: ForceSinglePhaseMode;
+  conf_dlm_mode: number;
+  conf_dlm_current_limit: number;
+  conf_dlm_eco_startcurr: number;
+  conf_grid_u_stop: number;
+  conf_grid_u_min: number;
+  conf_grid_u_max: number;
+  conf_grid_t_up: number;
+  conf_grid_t_dn: number;
+  conf_out_of_service: boolean;
+  conf_access_mode: number;
   response_time_ms: number;
   error_code: ErrorCode;
 }
@@ -191,10 +201,8 @@ export interface ConfigResponse {
 export interface ConfigRequest {
   conf_autostart_enabled?: boolean;
   conf_current_limit?: number;
-  conf_disp_enabled?: boolean;
   conf_front_led_enabled?: boolean;
   conf_rear_led_enabled?: boolean;
-  conf_buzzer_enabled?: boolean;
   conf_force_single_phase?: ForceSinglePhaseMode;
 }
 
