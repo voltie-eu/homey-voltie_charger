@@ -22,5 +22,8 @@
   },
   "1.1.4": {
     "en": "Refactor VoltieDevice to use structured device values and enhance configuration management"
+  },
+  "1.1.5": {
+    "en": "Add hardware limit check for the maximum charging current limit"
   }
 }
