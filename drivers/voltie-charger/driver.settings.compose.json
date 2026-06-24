@@ -17,8 +17,8 @@
         "id": "maxCurrentLimit",
         "type": "text",
         "value":"",
-        "label": { "en": "Maximum Current Limit" },
-        "hint": { "en": "The maximum current limit for your Voltie charger, be careful not to exceed the installation's capabilities!" }
+        "label": { "en": "Maximum current limit" },
+        "hint": { "en": "The maximum charging current limit for your Voltie charger, the hardware limit will override this if it is lower!" }
     },
     {
         "id": "username",

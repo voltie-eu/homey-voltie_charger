@@ -4,11 +4,11 @@ import VoltieAPIError from '../../libs/Voltie/VoltieAPIError';
 import VoltieDriver, { VoltieSettings } from './driver';
 import { StatusResponse, ConfigResponse, ConfigRequest } from '../../libs/Voltie/VoltieAPITypes';
 
-export interface IKeyValue { 
+export interface IKeyValue {
   [key: string]: any
 };
 
-export interface ICapabilityList{
+export interface ICapabilityList {
   id: string;
   options?: IKeyValue;
 }
@@ -28,7 +28,7 @@ export default class VoltieDevice extends Homey.Device {
   private api!: VoltieAPI;
   private apiError: number = 0;
   private pollingTimer: NodeJS.Timeout | null = null;
-  private deviceValues: IDeviceValues = { status: null, config: null};
+  private deviceValues: IDeviceValues = { status: null, config: null };
   private capabilityCache: Map<string, any> = new Map();
 
   // Device lifecycle methods
@@ -79,7 +79,7 @@ export default class VoltieDevice extends Homey.Device {
   private async onEVChargerChargingChanged(value: boolean): Promise<void> {
     if (this.deviceValues.status?.is_charging === value) return;
 
-    if(!this.deviceValues.status?.is_car_connected) {
+    if (!this.deviceValues.status?.is_car_connected) {
       throw new Error(this.homey.__('device.error.car_not_connected'));
     }
 
@@ -109,7 +109,7 @@ export default class VoltieDevice extends Homey.Device {
 
     const isCharging = this.deviceValues.status?.is_charging;
 
-    if(isCharging) {
+    if (isCharging) {
       try {
         await this.api.stopCharging();
         await this.pollLatest();
@@ -120,7 +120,7 @@ export default class VoltieDevice extends Homey.Device {
 
       await this.delay(2500);
     }
-    
+
     try {
       await this.api.updateConfiguration(this.createConfigRequest('conf_force_single_phase', value ? 1 : 0));
       await this.pollLatest();
@@ -129,7 +129,7 @@ export default class VoltieDevice extends Homey.Device {
       throw new Error(this.homey.__('device.error.cant_set_force_single_phase', { error }));
     }
 
-    if(isCharging) {
+    if (isCharging) {
       await this.delay(2500);
 
       try {
@@ -167,10 +167,15 @@ export default class VoltieDevice extends Homey.Device {
   }
 
   private async onCurrentLimitChanged(value: string): Promise<void> {
-    if (this.deviceValues.config?.conf_current_limit === parseInt(value, 10)) return;
+    const currentLimit = parseInt(value, 10)
+    if (this.deviceValues.config?.conf_current_limit === currentLimit) return;
+
+    if (currentLimit > parseInt(this.getSetting('maxCurrentLimit'), 10)){
+      throw new Error(this.homey.__('device.error.over_set_current_limit', { currentLimit }));
+    }
 
     try {
-      await this.api.updateConfiguration(this.createConfigRequest('conf_current_limit', parseInt(value, 10)));
+      await this.api.updateConfiguration(this.createConfigRequest('conf_current_limit', currentLimit));
       await this.pollLatest();
     } catch (error: VoltieAPIError | any) {
       if (error.code === 'REQUEST_ABORTED') return;
@@ -190,9 +195,7 @@ export default class VoltieDevice extends Homey.Device {
       username: newSettings.username?.length ? newSettings.username : undefined,
       password: newSettings.password?.length ? newSettings.password : undefined,
     });
-    
-    this.updateCurrentLimitOption(newSettings.maxCurrentLimit);
-    
+
     this.pollLatest();
   }
 
@@ -201,13 +204,13 @@ export default class VoltieDevice extends Homey.Device {
 
     try {
       this.deviceValues.status = await this.api.getStatus();
-      if(getConfig) this.deviceValues.config = await this.api.getConfiguration();
-      
+      if (getConfig) this.deviceValues.config = await this.api.getConfiguration();
+
       this.apiError = 0;
-      if(!this.getAvailable()) await this.setAvailable();
+      if (!this.getAvailable()) await this.setAvailable();
     } catch (error: VoltieAPIError | any) {
       if (error.code !== 'REQUEST_ABORTED') {
-        if (++this.apiError < this.MAX_API_RETRIES){
+        if (++this.apiError < this.MAX_API_RETRIES) {
           this.log(`API error occurred (attempt ${this.apiError}/${this.MAX_API_RETRIES}):`, error);
           await this.setUnavailable(this.homey.__('device.error.unavailable', { error }));
 
@@ -223,8 +226,9 @@ export default class VoltieDevice extends Homey.Device {
       return Promise.resolve();
     }
 
+    this.updateCapabilityOptions();
     this.updateCapabilityValues();
-    
+
     const interval = this.deviceValues.status?.is_car_connected ? this.FAST_POLLING_INTERVAL : this.SLOW_POLLING_INTERVAL;
     this.pollingTimer = this.homey.setTimeout(() => this.pollLatest(!getConfig), interval);
 
@@ -278,59 +282,60 @@ export default class VoltieDevice extends Homey.Device {
     return this.deviceValues.status?.is_car_connected || false;
   }
 
-  // Helper methods
+  // Update Capabilies
   private updateCapabilityValues(): void {
     const status = this.deviceValues.status;
-    if(status){
+    if (status) {
       this.updateCapabilityValue('evcharger_charging', status.is_charging);
       this.updateCapabilityValue('evcharger_charging_state', this.mapEVState(status));
       this.updateCapabilityValue('measure_power', status.charge_power * 1000);
       this.updateCapabilityValue('measure_current', status.charge_current);
       this.updateCapabilityValue('active_phases', status.phases_used);
-      
-      if(status.cdr) {
+
+      if (status.cdr) {
         this.updateCapabilityValue('meter_power', status.cdr.chg_energy);
         this.updateCapabilityValue('charging_time', new Date(status.cdr.chg_time * 1000).toISOString().slice(11, 19));
-      } else{
+      } else {
         this.updateCapabilityValue('meter_power', 0);
         this.updateCapabilityValue('charging_time', '00:00:00');
       }
     }
 
     const config = this.deviceValues.config;
-    if(config) {
+    if (config) {
       const autostartValue = !!config.conf_autostart_enabled;
-      if(this.updateCapabilityValue('autostart', autostartValue)) {
+      if (this.updateCapabilityValue('autostart', autostartValue)) {
         this.driver.autostartTriggerCard.trigger(this, { autostart: autostartValue }, {}).catch(this.error);
       }
 
       const forceSinglePhaseValue = config.conf_force_single_phase === 1;
-      if(this.updateCapabilityValue('force_single_phase', forceSinglePhaseValue)) {
+      if (this.updateCapabilityValue('force_single_phase', forceSinglePhaseValue)) {
         this.driver.forceSinglePhaseTriggerCard.trigger(this, { force_single_phase: forceSinglePhaseValue }, {}).catch(this.error);
       }
 
       const frontLedValue = !!config.conf_front_led_enabled;
-      if(this.updateCapabilityValue('front_led', frontLedValue)) {
+      if (this.updateCapabilityValue('front_led', frontLedValue)) {
         this.driver.frontLedTriggerCard.trigger(this, { front_led: frontLedValue }, {}).catch(this.error);
       }
 
       const rearLedValue = !!config.conf_rear_led_enabled;
-      if(this.updateCapabilityValue('rear_led', rearLedValue)) {
+      if (this.updateCapabilityValue('rear_led', rearLedValue)) {
         this.driver.rearLedTriggerCard.trigger(this, { rear_led: rearLedValue }, {}).catch(this.error);
       }
 
       const currentLimitValue = config.conf_current_limit;
-      if(this.updateCapabilityValue('current_limit', currentLimitValue.toString())) {
+      if (this.updateCapabilityValue('current_limit', currentLimitValue.toString())) {
         this.driver.currentLimitTriggerCard.trigger(this, { current_limit: currentLimitValue }, {}).catch(this.error);
       }
     }
   }
 
   private updateCapabilityValue(capabilityId: string, value: any): boolean {
-    if(this.hasCapability(capabilityId) && value !== null && value !== undefined) {
-      if(value !== this.capabilityCache.get(capabilityId)) {
+    if (this.hasCapability(capabilityId) && value !== null && value !== undefined) {
+      if (value !== this.capabilityCache.get(capabilityId)) {
         this.setCapabilityValue(capabilityId, value).catch((error) => {
           this.error(`Failed to update capability ${capabilityId} to:`, value, error);
+          this.capabilityCache.delete(capabilityId);
         });
         this.capabilityCache.set(capabilityId, value);
         return true;
@@ -339,24 +344,47 @@ export default class VoltieDevice extends Homey.Device {
     return false;
   }
 
-  private updateCurrentLimitOption(limit: number): void {
-    limit = Math.max(6, Math.min(limit, 32));
-    if (this.hasCapability('current_limit')) {
-      const values: { id: string; title: { en: string } }[] = [];
-      for (let i = 6; i <= limit; i++) {
-        values.push({
-          id: i.toString(),
-          title: { en: `Max current ${i}A` },
-        });
-      }
-      this.setCapabilityOptions('current_limit', { values }).catch((error) => {
-        this.error('Failed to set capability options for current_limit:', error);
-      });
+  private updateCapabilityOptions(): void {
+    const status = this.deviceValues.status;
+    if (status) {
+      this.updateCapabilityOption('current_limit', status.current_hw_limit);
     }
   }
 
+  private updateCapabilityOption(capabilityId: string, option: any): void {
+    if (this.hasCapability(capabilityId)) {
+      switch (capabilityId) {
+        case 'current_limit' :
+          const value = Math.min(this.getSetting('maxCurrentLimit'), option).toString();
+          if (value !== this.capabilityCache.get('current_limit')) {
+            this.setCapabilityOptions('current_limit', { values: this.createCurrentLimitOption(parseInt(value,10)) }).catch((error) => {
+              this.error('Failed to set capability options for current_limit:', error);
+              this.capabilityCache.delete('current_limit');
+            });
+            
+            this.setSettings({...this.getSettings(), maxCurrentLimit: value.toString()});
+            this.capabilityCache.set('current_limit', value);
+          }
+          break;
+      }
+    }
+  }
+
+  // Helper methods
+  private createCurrentLimitOption(limit: number): { id: string; title: { en: string } }[] {
+    limit = Math.max(6, Math.min(limit, 32));
+    const values = [];
+    for (let i = 6; i <= limit; i++) {
+      values.push({
+        id: i.toString(),
+        title: { en: `Max current ${i}A` },
+      });
+    };
+    return values;
+  }
+
   private createConfigRequest(attr: keyof ConfigRequest, value: any): ConfigRequest {
-    if(!this.deviceValues.config) this.deviceValues.config = {} as ConfigResponse;
+    if (!this.deviceValues.config) this.deviceValues.config = {} as ConfigResponse;
     this.deviceValues.config[attr] = value as never;
 
     const configRequest: ConfigRequest = {};
@@ -369,7 +397,7 @@ export default class VoltieDevice extends Homey.Device {
       'conf_rear_led_enabled',
       'conf_force_single_phase'
     ];
-    
+
     for (const key of configRequestKeys) {
       const val = this.deviceValues.config[key];
       if (val !== null && val !== undefined) configRequest[key] = val as never;
@@ -394,14 +422,14 @@ export default class VoltieDevice extends Homey.Device {
   }
 
   private async setupCapabilites(remove: ICapabilityList[], add: ICapabilityList[]) {
-    for (const cap of remove){
+    for (const cap of remove) {
       if (this.hasCapability(cap.id)) await this.removeCapability(cap.id);
     }
 
-    for (const cap of add){
-      if (!this.hasCapability(cap.id)){
+    for (const cap of add) {
+      if (!this.hasCapability(cap.id)) {
         await this.addCapability(cap.id);
-        if(cap.options) await this.setCapabilityOptions(cap.id, cap.options);
+        if (cap.options) await this.setCapabilityOptions(cap.id, cap.options);
       }
     }
   }

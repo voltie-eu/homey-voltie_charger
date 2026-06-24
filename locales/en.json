@@ -13,8 +13,8 @@
                 "id": "Unique ID",
                 "ip": "IP address",
                 "port": "Port",
-                "maxCurrentLimit": "Maximum Charging Current Limit (A)",
-                "maxCurrentLimitDesc": "Be careful not to exceed the installation's capabilities!",  
+                "maxCurrentLimit": "Maximum charging current limit (A)",
+                "maxCurrentLimitDesc": "The hardware limit will override this if it is lower!",
                 "username": "User name (not required)",
                 "password": "Password (not required)"
             },
@@ -32,7 +32,8 @@
             "cant_set_force_single_phase": "Failed to set force single phase: [__error__]",
             "cant_set_front_led": "Failed to set front LED: [__error__]",
             "cant_set_rear_led": "Failed to set rear LED: [__error__]",
-            "cant_set_current_limit": "Failed to set current limit: [__error__]"
+            "cant_set_current_limit": "Failed to set current limit: [__error__]",
+            "over_set_current_limit": "Setted current limit is more then maximum current limit: [__currentLimit__]A"
         }
     }
 }

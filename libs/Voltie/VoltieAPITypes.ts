@@ -119,6 +119,7 @@ export interface StatusResponse {
   mains_voltage: number;
   phases: number;
   phases_used: number;
+  current_hw_limit: number;
   current_offered: number;
   charge_current: number;
   charge_power: number;
