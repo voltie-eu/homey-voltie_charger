@@ -170,7 +170,7 @@ export default class VoltieDevice extends Homey.Device {
     const currentLimit = parseInt(value, 10)
     if (this.deviceValues.config?.conf_current_limit === currentLimit) return;
 
-    if (currentLimit > parseInt(this.getSetting('maxCurrentLimit'), 10)){
+    if (currentLimit > parseInt(this.getSetting('maxCurrentLimit'), 10)) {
       throw new Error(this.homey.__('device.error.over_set_current_limit', { currentLimit }));
     }
 
@@ -323,7 +323,7 @@ export default class VoltieDevice extends Homey.Device {
         this.driver.rearLedTriggerCard.trigger(this, { rear_led: rearLedValue }, {}).catch(this.error);
       }
 
-      const currentLimitValue = config.conf_current_limit;
+      const currentLimitValue = config.conf_current_limit || 6;
       if (this.updateCapabilityValue('current_limit', currentLimitValue.toString())) {
         this.driver.currentLimitTriggerCard.trigger(this, { current_limit: currentLimitValue }, {}).catch(this.error);
       }
@@ -354,16 +354,16 @@ export default class VoltieDevice extends Homey.Device {
   private updateCapabilityOption(capabilityId: string, option: any): void {
     if (this.hasCapability(capabilityId)) {
       switch (capabilityId) {
-        case 'current_limit' :
+        case 'current_limit':
           const value = Math.min(this.getSetting('maxCurrentLimit'), option).toString();
-          if (value !== this.capabilityCache.get('current_limit')) {
-            this.setCapabilityOptions('current_limit', { values: this.createCurrentLimitOption(parseInt(value,10)) }).catch((error) => {
+          if (value !== this.capabilityCache.get('current_hw_limit')) {
+            this.setCapabilityOptions('current_limit', { values: this.createCurrentLimitOption(parseInt(value, 10)) }).catch((error) => {
               this.error('Failed to set capability options for current_limit:', error);
-              this.capabilityCache.delete('current_limit');
+              this.capabilityCache.delete('current_hw_limit');
             });
-            
-            this.setSettings({...this.getSettings(), maxCurrentLimit: value.toString()});
-            this.capabilityCache.set('current_limit', value);
+
+            this.setSettings({ ...this.getSettings(), maxCurrentLimit: value });
+            this.capabilityCache.set('current_hw_limit', value);
           }
           break;
       }
