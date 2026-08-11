@@ -13,6 +13,8 @@ import {
   ConfigUpdateResponse,
   PowerResponse,
   VoltieAPIConfig,
+  ExtrasCommand,
+  ExtrasResponse,
 } from './VoltieAPITypes';
 
 export default class VoltieAPI {
@@ -184,6 +186,23 @@ export default class VoltieAPI {
     try {
       const signal = this.getAbortSignal(endpoint);
       const response = await this.axiosInstance.get<PowerResponse>(endpoint, { signal });
+      this.cleanupAbortController(endpoint);
+      return response.data;
+    } catch (error) {
+      this.cleanupAbortController(endpoint);
+      throw this.handleError(error);
+    }
+  }
+
+  async setExtras<TParams = object>(command: ExtrasCommand, params: TParams = {} as TParams): Promise<ExtrasResponse> {
+    const endpoint = '/extras';
+    try {
+      const signal = this.getAbortSignal(endpoint);
+      const response = await this.axiosInstance.post<ExtrasResponse>(
+        endpoint,
+        { command, params },
+        { signal },
+      );
       this.cleanupAbortController(endpoint);
       return response.data;
     } catch (error) {

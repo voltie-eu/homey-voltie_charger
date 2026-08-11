@@ -286,7 +286,7 @@ export default class VoltieDevice extends Homey.Device {
   private updateCapabilityValues(): void {
     const status = this.deviceValues.status;
     if (status) {
-      this.updateCapabilityValue('evcharger_charging', status.is_charging);
+      this.updateCapabilityValue('evcharger_charging', status.is_charging, true);
       this.updateCapabilityValue('evcharger_charging_state', this.mapEVState(status));
       this.updateCapabilityValue('measure_power', status.charge_power * 1000);
       this.updateCapabilityValue('measure_current', status.charge_current);
@@ -330,9 +330,9 @@ export default class VoltieDevice extends Homey.Device {
     }
   }
 
-  private updateCapabilityValue(capabilityId: string, value: any): boolean {
+  private updateCapabilityValue(capabilityId: string, value: any, skipCache = false): boolean {
     if (this.hasCapability(capabilityId) && value !== null && value !== undefined) {
-      if (value !== this.capabilityCache.get(capabilityId)) {
+      if (skipCache || value !== this.capabilityCache.get(capabilityId)) {
         this.setCapabilityValue(capabilityId, value).catch((error) => {
           this.error(`Failed to update capability ${capabilityId} to:`, value, error);
           this.capabilityCache.delete(capabilityId);
@@ -351,12 +351,12 @@ export default class VoltieDevice extends Homey.Device {
     }
   }
 
-  private updateCapabilityOption(capabilityId: string, option: any): void {
+  private updateCapabilityOption(capabilityId: string, option: any, skipCache = false): void {
     if (this.hasCapability(capabilityId)) {
       switch (capabilityId) {
         case 'current_limit':
           const value = Math.min(this.getSetting('maxCurrentLimit'), option).toString();
-          if (value !== this.capabilityCache.get('current_hw_limit')) {
+          if (skipCache || value !== this.capabilityCache.get('current_hw_limit')) {
             this.setCapabilityOptions('current_limit', { values: this.createCurrentLimitOption(parseInt(value, 10)) }).catch((error) => {
               this.error('Failed to set capability options for current_limit:', error);
               this.capabilityCache.delete('current_hw_limit');

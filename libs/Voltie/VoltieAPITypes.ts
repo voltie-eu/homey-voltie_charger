@@ -220,3 +220,26 @@ export interface VoltieAPIConfig {
   username?: string | undefined | null;
   password?: string | undefined | null;
 }
+
+export type ExtrasCommand = 'display_scroll_text' | 'rear_led_set' | 'charger_reboot';
+export interface DisplayScrollTextParams {
+  message: string;
+  repeat_count?: number;
+  clear_first?: boolean;
+}
+
+export interface RearLedSetParams {
+  brightness: number;
+  color_rgb: string;
+  duration_sec?: number;
+}
+
+export interface ExtrasRequest<TParams = object> {
+  command: ExtrasCommand;
+  params: TParams;
+}
+
+export interface ExtrasResponse {
+  response_time_ms: number;
+  error_code: ErrorCode;
+}
