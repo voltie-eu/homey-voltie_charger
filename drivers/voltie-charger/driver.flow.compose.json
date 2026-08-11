@@ -214,6 +214,38 @@
       ]
     },
     {
+      "id": "display_scroll_text",
+      "title": {
+          "en": "Set text on charger to..."
+      },
+      "titleFormatted": {
+        "en": "Set text on charger to [[scroll_text]] and repeat [[repeat_count]]"
+      },
+      "args": [
+        {
+          "type": "text",
+          "name": "scroll_text",
+          "title": {
+            "en": "Text"
+          }
+        },
+        {
+          "type": "dropdown",
+          "name": "repeat_count",
+          "title": {
+            "en": "X time"
+          },
+          "values": [
+            { "id": "1", "title": { "en": "1 time" } },
+            { "id": "2", "title": { "en": "2 times" } },
+            { "id": "3", "title": { "en": "3 times" } },
+            { "id": "4", "title": { "en": "4 times" } },
+            { "id": "5", "title": { "en": "5 times" } }
+          ]
+        }
+      ]
+    },
+    {
       "id": "charger_reboot",
       "title": {
           "en": "Reboot Charger"

@@ -2,7 +2,7 @@ import Homey from 'homey';
 import VoltieAPI from '../../libs/Voltie/VoltieAPI';
 import VoltieAPIError from '../../libs/Voltie/VoltieAPIError';
 import VoltieDriver, { VoltieSettings } from './driver';
-import { StatusResponse, ConfigResponse, ConfigRequest } from '../../libs/Voltie/VoltieAPITypes';
+import { StatusResponse, ConfigResponse, ConfigRequest, DisplayScrollTextParams } from '../../libs/Voltie/VoltieAPITypes';
 
 export interface IKeyValue {
   [key: string]: any
@@ -259,6 +259,19 @@ export default class VoltieDevice extends Homey.Device {
 
   public async setCurrentLimit(value: number): Promise<void> {
     return this.onCurrentLimitChanged(value.toString());
+  }
+
+  public async setScrollText(message: string, repeat_count: string): Promise<void> {
+    try {
+      await this.api.setExtras<DisplayScrollTextParams>('display_scroll_text', { 
+        message, 
+        repeat_count: parseInt(repeat_count, 10),
+        clear_first: true 
+      });
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.error.cant_set_scroll_text', { error }));
+    }
   }
 
   public async rebootCharger(): Promise<void> {
