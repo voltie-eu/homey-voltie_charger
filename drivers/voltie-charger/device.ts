@@ -274,6 +274,19 @@ export default class VoltieDevice extends Homey.Device {
     }
   }
 
+  public async setRearLedColor(brightness: string, color: string, duration: string): Promise<void> {
+    try {
+      await this.api.setExtras('rear_led_set', {
+        brightness: parseFloat(brightness),
+        color_rgb: color,
+        duration_sec: parseInt(duration, 10)
+      });
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.error.cant_set_rear_led_color', { error }));
+    }
+  }
+
   public async rebootCharger(): Promise<void> {
     try {
       await this.api.setExtras('charger_reboot');

@@ -246,6 +246,41 @@
       ]
     },
     {
+      "id": "rear_led_set",
+      "title": {
+          "en": "Set rear LED brightness and color to..."
+      },
+      "titleFormatted": {
+        "en": "Set rear LED brightness to [[brightness]] and color to [[color]] for [[duration]] seconds"
+      },
+      "args": [
+        {
+          "type": "range",
+          "name": "brightness",
+          "title": { "en": "Brightness" },
+          "min": 0,
+          "max": 1,
+          "step": 0.01,
+          "label": "%",
+          "labelMultiplier": 100,
+          "labelDecimals": 0
+        },
+        {
+          "type": "color",
+          "name": "color"
+        },
+        {
+          "type": "number",
+          "name": "duration",
+          "title": { "en": "Duration" },
+          "placeholder": { "en": "In seconds" },
+          "min": 0,
+          "max": 3600,
+          "step": 1
+        }
+      ]
+    },
+    {
       "id": "charger_reboot",
       "title": {
           "en": "Reboot Charger"

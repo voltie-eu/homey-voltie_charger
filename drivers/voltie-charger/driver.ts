@@ -43,6 +43,7 @@ export default class VoltieDriver extends Homey.Driver {
     this.registerCapabilityAction('set_front_led', 'setFrontLed', 'front_led');
     this.registerCapabilityAction('set_rear_led', 'setRearLed', 'rear_led');
     this.registerCapabilityAction('display_scroll_text', 'setScrollText', ['scroll_text', 'repeat_count']);
+    this.registerCapabilityAction('rear_led_set', 'setRearLedColor', ['brightness', 'color', 'duration']);
     this.registerCapabilityAction('charger_reboot', 'rebootCharger', []);
 
     this.currentLimitTriggerCard = this.homey.flow.getDeviceTriggerCard('current_limit_changed');
