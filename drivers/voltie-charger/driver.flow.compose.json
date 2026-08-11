@@ -267,7 +267,8 @@
         },
         {
           "type": "color",
-          "name": "color"
+          "name": "color",
+          "title": { "en": "Color" }
         },
         {
           "type": "number",
