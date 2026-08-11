@@ -471,10 +471,10 @@
       {
         "id": "rear_led_set",
         "title": {
-          "en": "Set rear led to..."
+          "en": "Set rear LED brightness and color to..."
         },
         "titleFormatted": {
-          "en": "Set rear led brightness to [[brightness]] and color to [[color]] for [[duration]] seconds"
+          "en": "Set rear LED brightness to [[brightness]] and color to [[color]] for [[duration]] seconds"
         },
         "args": [
           {
