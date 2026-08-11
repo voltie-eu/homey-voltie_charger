@@ -212,6 +212,15 @@
           ]
         }
       ]
+    },
+    {
+      "id": "charger_reboot",
+      "title": {
+          "en": "Reboot Charger"
+      },
+      "titleFormatted": {
+        "en": "Reboot Charger"
+      }
     }
   ]
 }

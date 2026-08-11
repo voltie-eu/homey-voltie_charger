@@ -261,6 +261,15 @@ export default class VoltieDevice extends Homey.Device {
     return this.onCurrentLimitChanged(value.toString());
   }
 
+  public async rebootCharger(): Promise<void> {
+    try {
+      await this.api.setExtras('charger_reboot');
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.error.cant_reboot_charger', { error }));
+    }
+  }
+
   // Getters
   public getAutostart(): boolean {
     return this.deviceValues.config?.conf_autostart_enabled || false;

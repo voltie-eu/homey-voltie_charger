@@ -405,6 +405,22 @@
             ]
           }
         ]
+      },
+      {
+        "id": "charger_reboot",
+        "title": {
+          "en": "Reboot Charger"
+        },
+        "titleFormatted": {
+          "en": "Reboot Charger"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=voltie-charger"
+          }
+        ]
       }
     ]
   },
