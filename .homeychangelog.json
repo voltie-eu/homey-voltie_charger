@@ -28,5 +28,8 @@
   },
   "1.1.6": {
     "en": "Fix current limit handling and update capability cache bug"
+  },
+  "1.1.7": {
+    "en": "Add \"Reboot charger\", \"Set text on charger\" and \"Set rear LED color\" action flow cards"
   }
 }
