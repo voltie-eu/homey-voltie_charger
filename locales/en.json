@@ -3,7 +3,7 @@
         "choose_pairing": {
             "title": "Select pairing method",
             "AUTO": "Search your Voltie automatically on the network",
-            "MANUAL": "Setup your Voltie manually by entering required informations",
+            "MANUAL": "Setup your Voltie manually by entering the required information.",
             "next": "Next"
         },
         "setup_device": {
@@ -33,7 +33,7 @@
             "cant_set_front_led": "Failed to set front LED: [__error__]",
             "cant_set_rear_led": "Failed to set rear LED: [__error__]",
             "cant_set_current_limit": "Failed to set current limit: [__error__]",
-            "over_set_current_limit": "Setted current limit is more then maximum current limit: [__currentLimit__]A",
+            "over_set_current_limit": "The set current limit is higher than the maximum current limit: [__currentLimit__]A",
             "cant_set_scroll_text": "Failed to set scroll text: [__error__]",
             "cant_set_rear_led_color":"Failed to set rear LED color: [__error__]",
             "cant_reboot_charger": "Failed to reboot charger: [__error__]"
