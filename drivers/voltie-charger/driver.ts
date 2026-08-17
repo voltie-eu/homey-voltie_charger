@@ -7,8 +7,8 @@ export interface VoltieData{
 }
 export interface VoltieSettings{
   ip: string;
-  port: number;
-  maxCurrentLimit: number;
+  port: string;
+  maxCurrentLimit: string;
   username?: string;
   password?: string;
 }
@@ -66,7 +66,7 @@ export default class VoltieDriver extends Homey.Driver {
           return {
             name: device.name,
             data: {
-              id: device.id,
+              id: device.id, //TODO add prefix for testing device install
             },
             settings: {
               ip: device.address

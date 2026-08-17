@@ -24,7 +24,7 @@
 
     <div class="homey-form-group">
       <label class="homey-form-label" for="dMaxCurrentLimit" data-i18n="pair.setup_device.labels.maxCurrentLimit"></label>
-      <input class="homey-form-input" id="dMaxCurrentLimit" type="number" min="6" max="32" value="16" required/>
+      <input class="homey-form-input" id="dMaxCurrentLimit" type="number" min="6" max="32" value="32" required/>
       <div data-i18n="pair.setup_device.labels.maxCurrentLimitDesc" style="font-size: 12px; color: var(--homey-color-text-danger);"></div>
     </div>
 
@@ -94,10 +94,10 @@
       },
       settings: {
         ip: dIp.value.trim(),
-        port: parseInt(dPort.value.trim()),
+        port: dPort.value.trim(),
         username: dUsername.value.trim(),
         password: dPassword.value.trim(),
-        maxCurrentLimit: parseInt(dMaxCurrentLimit.value.trim())
+        maxCurrentLimit: dMaxCurrentLimit.value.trim()
       },
     });
   }

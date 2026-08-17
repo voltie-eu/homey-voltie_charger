@@ -37,6 +37,7 @@
             "cant_set_scroll_text": "Failed to set scroll text: [__error__]",
             "cant_set_rear_led_color":"Failed to set rear LED color: [__error__]",
             "cant_reboot_charger": "Failed to reboot charger: [__error__]"
-        }
+        },
+        "day": "day"
     }
 }

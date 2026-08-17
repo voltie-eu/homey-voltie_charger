@@ -35,11 +35,7 @@ export default class VoltieDevice extends Homey.Device {
   async onInit(): Promise<void> {
     this.log('VoltieDevice has been initialized');
 
-    await this.setupCapabilites([
-      { id: 'phase' }, // Renamed to 'active_phases' in v1.1
-    ], [
-      { id: 'active_phases' } // Renamed from 'phase' in v1.1
-    ]);
+    await this.setupCapabilites([], []);
 
     this.registerCapabilityListener('evcharger_charging', this.onEVChargerChargingChanged.bind(this));
     this.registerCapabilityListener('autostart', this.onAutostartChanged.bind(this));
@@ -191,7 +187,7 @@ export default class VoltieDevice extends Homey.Device {
 
     this.api = new VoltieAPI({
       ip: newSettings.ip,
-      port: newSettings.port || 5059,
+      port: parseInt(newSettings.port, 10) || 5059,
       username: newSettings.username?.length ? newSettings.username : undefined,
       password: newSettings.password?.length ? newSettings.password : undefined,
     });
@@ -236,7 +232,7 @@ export default class VoltieDevice extends Homey.Device {
   }
 
   private stopPolling(): void {
-    if (this.pollingTimer) this.homey.clearInterval(this.pollingTimer);
+    if (this.pollingTimer) this.homey.clearTimeout(this.pollingTimer);
     this.pollingTimer = null;
   }
 
@@ -329,7 +325,7 @@ export default class VoltieDevice extends Homey.Device {
 
       if (status.cdr) {
         this.updateCapabilityValue('meter_power', status.cdr.chg_energy);
-        this.updateCapabilityValue('charging_time', new Date(status.cdr.chg_time * 1000).toISOString().slice(11, 19));
+        this.updateCapabilityValue('charging_time', this.formatChargingTime(status.cdr.chg_time));
       } else {
         this.updateCapabilityValue('meter_power', 0);
         this.updateCapabilityValue('charging_time', '00:00:00');
@@ -454,6 +450,17 @@ export default class VoltieDevice extends Homey.Device {
     }
 
     return 'plugged_in_paused';
+  }
+
+  private formatChargingTime(seconds: number): string {
+    const days = Math.floor(seconds / 86400);
+    const remainder = seconds % 86400;
+    const hours = String(Math.floor(remainder / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((remainder % 3600) / 60)).padStart(2, '0');
+    const secs = String(remainder % 60).padStart(2, '0');
+
+    if (days > 0) return `${days}${this.homey.__('device.day')} ${hours}:${minutes}`;
+    return `${hours}:${minutes}:${secs}`;
   }
 
   private async setupCapabilites(remove: ICapabilityList[], add: ICapabilityList[]) {

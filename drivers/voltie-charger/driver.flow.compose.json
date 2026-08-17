@@ -233,7 +233,7 @@
           "type": "dropdown",
           "name": "repeat_count",
           "title": {
-            "en": "X time"
+            "en": "Count"
           },
           "values": [
             { "id": "1", "title": { "en": "1 time" } },
@@ -248,10 +248,10 @@
     {
       "id": "rear_led_set",
       "title": {
-          "en": "Set rear LED brightness and color to..."
+          "en": "Set 'Rear LED' brightness and color to..."
       },
       "titleFormatted": {
-        "en": "Set rear LED brightness to [[brightness]] and color to [[color]] for [[duration]] seconds"
+        "en": "Set 'Rear LED' brightness to [[brightness]] and color to [[color]] for [[duration]] seconds"
       },
       "args": [
         {
@@ -275,7 +275,7 @@
           "name": "duration",
           "title": { "en": "Duration" },
           "placeholder": { "en": "In seconds" },
-          "min": 0,
+          "min": 1,
           "max": 3600,
           "step": 1
         }
@@ -288,6 +288,9 @@
       },
       "titleFormatted": {
         "en": "Reboot Charger"
+      },
+      "hint": {
+        "en": "Use with caution! Avoid triggering this action from flows that may cause repeated or automatic reboots."
       }
     }
   ]
