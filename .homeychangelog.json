@@ -31,5 +31,8 @@
   },
   "1.1.7": {
     "en": "Add \"Reboot charger\", \"Set text on charger\" and \"Set rear LED color\" action flow cards"
+  },
+  "1.1.8": {
+    "en": "Fix app crash after new install and some small enhancement"
   }
 }
