@@ -265,7 +265,6 @@ export default class VoltieDevice extends Homey.Device {
         clear_first: true 
       });
     } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
       throw new Error(this.homey.__('device.error.cant_set_scroll_text', { error }));
     }
   }
@@ -278,7 +277,6 @@ export default class VoltieDevice extends Homey.Device {
         duration_sec: parseInt(duration, 10)
       });
     } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
       throw new Error(this.homey.__('device.error.cant_set_rear_led_color', { error }));
     }
   }
@@ -287,7 +285,6 @@ export default class VoltieDevice extends Homey.Device {
     try {
       await this.api.setExtras('charger_reboot');
     } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
       throw new Error(this.homey.__('device.error.cant_reboot_charger', { error }));
     }
   }
@@ -441,14 +438,14 @@ export default class VoltieDevice extends Homey.Device {
       return 'plugged_out';
     }
 
-    if (status.is_car_connected && !this.deviceValues.status?.is_car_connected) {
-      return 'plugged_in';
-    }
-
     if (status.is_charging) {
       return 'plugged_in_charging';
     }
 
+    const prevState = this.capabilityCache.get('evcharger_charging_state');
+    if (!prevState || prevState === 'plugged_out') {
+      return 'plugged_in';
+    }
     return 'plugged_in_paused';
   }
 
