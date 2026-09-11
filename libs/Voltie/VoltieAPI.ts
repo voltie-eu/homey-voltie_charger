@@ -60,31 +60,38 @@ export default class VoltieAPI {
     this.httpAgent.destroy();
   }
 
-  private getAbortSignal(endpoint: string): AbortSignal {
-    const existingController = this.abortControllers.get(endpoint);
+  private getAbortKey(endpoint: string, method: string): string {
+    return `${method}:${endpoint}`;
+  }
+
+  private getAbortSignal(endpoint: string, method: string): AbortSignal {
+    const key = this.getAbortKey(endpoint, method);
+    const existingController = this.abortControllers.get(key);
+
     if (existingController) {
       existingController.abort();
     }
 
     const newController = new AbortController();
-    this.abortControllers.set(endpoint, newController);
+    this.abortControllers.set(key, newController);
 
     return newController.signal;
   }
 
-  private cleanupAbortController(endpoint: string): void {
-    this.abortControllers.delete(endpoint);
+  private cleanupAbortController(endpoint: string, method: string): void {
+    const key = this.getAbortKey(endpoint, method);
+    this.abortControllers.delete(key);
   }
 
   async getApiVersion(): Promise<ApiVersionResponse> {
     const endpoint = '/apiver';
     try {
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
       const response = await this.axiosInstance.get<ApiVersionResponse>(endpoint, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -92,12 +99,12 @@ export default class VoltieAPI {
   async getStatus(): Promise<StatusResponse> {
     const endpoint = '/status';
     try {
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
       const response = await this.axiosInstance.get<StatusResponse>(endpoint, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -114,13 +121,13 @@ export default class VoltieAPI {
       }
 
       const query = queryParams.toString();
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
 
       const response = await this.axiosInstance.get<StartChargingResponse>(query ? `${endpoint}?${query}` : endpoint, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -128,12 +135,12 @@ export default class VoltieAPI {
   async stopCharging(): Promise<StopChargingResponse> {
     const endpoint = '/stop';
     try {
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
       const response = await this.axiosInstance.get<StopChargingResponse>(endpoint, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -141,12 +148,12 @@ export default class VoltieAPI {
   async getConfiguration(): Promise<ConfigResponse> {
     const endpoint = '/config';
     try {
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
       const response = await this.axiosInstance.get<ConfigResponse>(endpoint, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -154,12 +161,17 @@ export default class VoltieAPI {
   async updateConfiguration(config: ConfigRequest): Promise<ConfigUpdateResponse> {
     const endpoint = '/config';
     try {
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'PUT');
       const response = await this.axiosInstance.put<ConfigUpdateResponse>(endpoint, config, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'PUT');
+
+      if (response.data.error_code !== 0 || response.data.accepted === 0) {
+        throw new VoltieAPIError('CONFIG_FAILED', 'Failed to set configuration!');
+      }
+
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'PUT');
       throw this.handleError(error);
     }
   }
@@ -171,12 +183,12 @@ export default class VoltieAPI {
         throw new VoltieAPIError('INVALID_PARAM', 'CDR ID must be a positive number');
       }
 
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
       const response = await this.axiosInstance.get<GetCDRResponse>(`${endpoint}?cdr_id=${cdrId}`, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -184,12 +196,12 @@ export default class VoltieAPI {
   async getPowerDetails(): Promise<PowerResponse> {
     const endpoint = '/power';
     try {
-      const signal = this.getAbortSignal(endpoint);
+      const signal = this.getAbortSignal(endpoint, 'GET');
       const response = await this.axiosInstance.get<PowerResponse>(endpoint, { signal });
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
+      this.cleanupAbortController(endpoint, 'GET');
       throw this.handleError(error);
     }
   }
@@ -197,16 +209,17 @@ export default class VoltieAPI {
   async setExtras<TParams = object>(command: ExtrasCommand, params: TParams = {} as TParams): Promise<ExtrasResponse> {
     const endpoint = '/extras';
     try {
-      const signal = this.getAbortSignal(endpoint);
       const response = await this.axiosInstance.post<ExtrasResponse>(
         endpoint,
         { command, params },
-        { signal },
       );
-      this.cleanupAbortController(endpoint);
+
+      if (response.data.error_code !== 0) {
+        throw new VoltieAPIError('EXTRAS_FAILED', 'Failed to execute extras command!');
+      }
+
       return response.data;
     } catch (error) {
-      this.cleanupAbortController(endpoint);
       throw this.handleError(error);
     }
   }

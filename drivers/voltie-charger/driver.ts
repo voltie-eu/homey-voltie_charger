@@ -1,6 +1,5 @@
 import Homey, { DiscoveryResultMDNSSD } from 'homey';
 import { PairSession } from 'homey/lib/Driver';
-import VoltieDevice from './device';
 
 export interface VoltieData{
   id: string; // The device hostname
