@@ -37,5 +37,8 @@
   },
   "1.1.9": {
     "en": "Some minor bug fix"
+  },
+  "1.2.0": {
+    "en": "Add TargetPower and TargetPowerMode capabilities"
   }
 }
