@@ -35,14 +35,20 @@ export default class VoltieDevice extends Homey.Device {
   async onInit(): Promise<void> {
     this.log('VoltieDevice has been initialized');
 
-    await this.setupCapabilites([], []);
+    await this.setupCapabilites([], [
+      {id: 'target_power'}, // Added at v1.2.0
+      {id: 'target_power_mode'} // Added at v1.2.0
+    ]);
 
+    this.updateCapabilityValue('target_power_mode', 'homey'); //set default value for target_power_mode to 'homey'
+    
+    this.registerMultipleCapabilityListener(['target_power_mode', 'target_power'], this.onTargetPowerChanged.bind(this), 500);
     this.registerCapabilityListener('evcharger_charging', this.onEVChargerChargingChanged.bind(this));
+    this.registerCapabilityListener('current_limit', this.onCurrentLimitChanged.bind(this));
     this.registerCapabilityListener('autostart', this.onAutostartChanged.bind(this));
     this.registerCapabilityListener('force_single_phase', this.onForceSinglePhaseChanged.bind(this));
     this.registerCapabilityListener('front_led', this.onFrontLedChanged.bind(this));
     this.registerCapabilityListener('rear_led', this.onRearLedChanged.bind(this));
-    this.registerCapabilityListener('current_limit', this.onCurrentLimitChanged.bind(this));
 
     this.startPolling(this.getSettings());
   }
@@ -72,7 +78,20 @@ export default class VoltieDevice extends Homey.Device {
   }
 
   // Device capability listeners
+  private async onTargetPowerChanged(values: { [capabilityId: string]: any }): Promise<void> {
+    if(values.target_power_mode !== undefined) {
+      this.capabilityCache.set('target_power_mode', values.target_power_mode);
+    }
+
+    if(values.target_power !== undefined) {
+      this.isHomeyInCharge();
+      this.onCurrentLimitChanged(this.targetPower2CurrentLimit(values.target_power).toString());
+    }
+  }
+
   private async onEVChargerChargingChanged(value: boolean): Promise<void> {
+    this.isHomeyInCharge();
+
     if (this.deviceValues.status?.is_charging === value) return;
 
     if (!this.deviceValues.status?.is_car_connected) {
@@ -85,6 +104,25 @@ export default class VoltieDevice extends Homey.Device {
     } catch (error: VoltieAPIError | any) {
       if (error.code === 'REQUEST_ABORTED') return;
       throw new Error(this.homey.__('device.error.cant_control_charging', { error }));
+    }
+  }
+
+  private async onCurrentLimitChanged(value: string): Promise<void> {
+    this.isHomeyInCharge();
+
+    const currentLimit = parseInt(value, 10)
+    if (this.deviceValues.config?.conf_current_limit === currentLimit) return;
+
+    if (currentLimit > parseInt(this.getSetting('maxCurrentLimit'), 10)) {
+      throw new Error(this.homey.__('device.error.over_set_current_limit', { currentLimit }));
+    }
+
+    try {
+      await this.api.updateConfiguration(this.createConfigRequest('conf_current_limit', currentLimit));
+      await this.pollLatest();
+    } catch (error: VoltieAPIError | any) {
+      if (error.code === 'REQUEST_ABORTED') return;
+      throw new Error(this.homey.__('device.error.cant_set_current_limit', { error }));
     }
   }
 
@@ -162,23 +200,6 @@ export default class VoltieDevice extends Homey.Device {
     }
   }
 
-  private async onCurrentLimitChanged(value: string): Promise<void> {
-    const currentLimit = parseInt(value, 10)
-    if (this.deviceValues.config?.conf_current_limit === currentLimit) return;
-
-    if (currentLimit > parseInt(this.getSetting('maxCurrentLimit'), 10)) {
-      throw new Error(this.homey.__('device.error.over_set_current_limit', { currentLimit }));
-    }
-
-    try {
-      await this.api.updateConfiguration(this.createConfigRequest('conf_current_limit', currentLimit));
-      await this.pollLatest();
-    } catch (error: VoltieAPIError | any) {
-      if (error.code === 'REQUEST_ABORTED') return;
-      throw new Error(this.homey.__('device.error.cant_set_current_limit', { error }));
-    }
-  }
-
   // Pooling methods
   private startPolling(newSettings: VoltieSettings): void {
     this.stopPolling();
@@ -237,6 +258,10 @@ export default class VoltieDevice extends Homey.Device {
   }
 
   // Setters
+  public async setCurrentLimit(value: number): Promise<void> {
+    return this.onCurrentLimitChanged(value.toString());
+  }
+
   public async setAutostart(value: string): Promise<void> {
     return this.onAutostartChanged(value === 'true');
   }
@@ -251,10 +276,6 @@ export default class VoltieDevice extends Homey.Device {
 
   public async setRearLed(value: string): Promise<void> {
     return this.onRearLedChanged(value === 'true');
-  }
-
-  public async setCurrentLimit(value: number): Promise<void> {
-    return this.onCurrentLimitChanged(value.toString());
   }
 
   public async setScrollText(message: string, repeat_count: string): Promise<void> {
@@ -355,6 +376,8 @@ export default class VoltieDevice extends Homey.Device {
       if (this.updateCapabilityValue('current_limit', currentLimitValue.toString())) {
         this.driver.currentLimitTriggerCard.trigger(this, { current_limit: currentLimitValue }, {}).catch(this.error);
       }
+
+      this.updateCapabilityValue('target_power', this.currentLimit2TargetPower(currentLimitValue));
     }
   }
 
@@ -374,31 +397,81 @@ export default class VoltieDevice extends Homey.Device {
 
   private updateCapabilityOptions(): void {
     const status = this.deviceValues.status;
+    const config = this.deviceValues.config;
     if (status) {
       this.updateCapabilityOption('current_limit', status.current_hw_limit);
+    }
+    if(status && config) {
+      this.updateCapabilityOption('target_power', { conf_force_single_phase: config.conf_force_single_phase, current_hw_limit: status.current_hw_limit });
     }
   }
 
   private updateCapabilityOption(capabilityId: string, option: any, skipCache = false): void {
     if (this.hasCapability(capabilityId)) {
-      switch (capabilityId) {
-        case 'current_limit':
-          const value = Math.min(this.getSetting('maxCurrentLimit'), option).toString();
-          if (skipCache || value !== this.capabilityCache.get('current_hw_limit')) {
-            this.setCapabilityOptions('current_limit', { values: this.createCurrentLimitOption(parseInt(value, 10)) }).catch((error) => {
-              this.error('Failed to set capability options for current_limit:', error);
-              this.capabilityCache.delete('current_hw_limit');
-            });
+      if(capabilityId === 'target_power') {
+        const currentHwLimit = Math.min(parseInt(this.getSetting('maxCurrentLimit'), 10), option.current_hw_limit);
+        const phases = option.conf_force_single_phase === 1 ? 1 : 3;
+        if(
+          skipCache || 
+          currentHwLimit !== this.capabilityCache.get('option__target_power__current_limit') || 
+          phases !== this.capabilityCache.get('option__target_power__phases')
+        ) {
+          const value = this.createTargetPowerOption(phases, currentHwLimit);
+          this.setCapabilityOptions('target_power', value).catch((error) => {
+            this.error('Failed to set capability options for target_power:', error);
+            this.capabilityCache.delete('option__target_power__current_limit');
+            this.capabilityCache.delete('option__target_power__phases');
+          });
+          
+          this.capabilityCache.set('option__target_power__current_limit', currentHwLimit);
+          this.capabilityCache.set('option__target_power__phases', phases);
+        }
+      }else if(capabilityId === 'current_limit') {
+        const currentHwLimit = Math.min(parseInt(this.getSetting('maxCurrentLimit'), 10), option);
+        if (
+          skipCache || 
+          currentHwLimit !== this.capabilityCache.get('option__current_limit__current_hw_limit')
+        ) {
+          this.setCapabilityOptions('current_limit', { values: this.createCurrentLimitOption(currentHwLimit) }).catch((error) => {
+            this.error('Failed to set capability options for current_limit:', error);
+            this.capabilityCache.delete('option__current_limit__current_hw_limit');
+          });
 
-            this.setSettings({ ...this.getSettings(), maxCurrentLimit: value });
-            this.capabilityCache.set('current_hw_limit', value);
-          }
-          break;
+          this.setSettings({ ...this.getSettings(), maxCurrentLimit: currentHwLimit.toString() });
+          this.capabilityCache.set('option__current_limit__current_hw_limit', currentHwLimit);
+        }
       }
     }
   }
 
   // Helper methods
+  private isHomeyInCharge(): void {
+    if (this.capabilityCache.get('target_power_mode') !== 'homey') {
+      throw new Error(this.homey.__('device.error.not_homey_in_charge'));
+    }
+  }
+
+  private targetPower2CurrentLimit(targetPower: number): number {
+    const phases = this.deviceValues.config?.conf_force_single_phase === 1 ? 1 : 3;
+    return Math.max(Math.round(targetPower / 230 / phases), 6);
+  }
+
+  private currentLimit2TargetPower(currentLimit: number): number {
+    const phases = this.deviceValues.config?.conf_force_single_phase === 1 ? 1 : 3;
+    return currentLimit * 230 * phases;
+  }
+
+  private createTargetPowerOption(phases: number, maxCurrentLimit: number): { min: number; max: number; step: number; excludeMin: number; excludeMax: number, uiComponent?: any } {
+    return {
+      min: 0,
+      max: maxCurrentLimit * phases * 230,
+      step: 230 * phases,
+      excludeMin: 0,
+      excludeMax: 6 * phases * 230,
+      uiComponent: null
+    }
+  }
+
   private createCurrentLimitOption(limit: number): { id: string; title: { en: string } }[] {
     limit = Math.max(6, Math.min(limit, 32));
     const values = [];

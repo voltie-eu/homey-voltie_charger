@@ -556,7 +556,9 @@
         "charging_time",
         "meter_power",
         "measure_power",
-        "measure_current"
+        "measure_current",
+        "target_power",
+        "target_power_mode"
       ],
       "capabilitiesOptions": {
         "meter_power": {
@@ -573,6 +575,30 @@
           "title": {
             "en": "Charging Current"
           }
+        },
+        "target_power_mode": {
+          "values": [
+            {
+              "id": "homey",
+              "title": {
+                "en": "Homey"
+              }
+            },
+            {
+              "id": "voltie",
+              "title": {
+                "en": "Voltie"
+              }
+            }
+          ]
+        },
+        "target_power": {
+          "min": 0,
+          "max": 22080,
+          "step": 230,
+          "excludeMin": 0,
+          "excludeMax": 1380,
+          "uiComponent": null
         }
       },
       "energy": {
