@@ -402,7 +402,7 @@ export default class VoltieDevice extends Homey.Device {
       this.updateCapabilityOption('current_limit', status.current_hw_limit);
     }
     if(status && config) {
-      this.updateCapabilityOption('target_power', { conf_force_single_phase: config.conf_force_single_phase, current_hw_limit: status.current_hw_limit });
+      this.updateCapabilityOption('target_power', { phases: this.availablePhases(), current_hw_limit: status.current_hw_limit });
     }
   }
 
@@ -410,13 +410,12 @@ export default class VoltieDevice extends Homey.Device {
     if (this.hasCapability(capabilityId)) {
       if(capabilityId === 'target_power') {
         const currentHwLimit = Math.min(parseInt(this.getSetting('maxCurrentLimit'), 10), option.current_hw_limit);
-        const phases = option.conf_force_single_phase === 1 ? 1 : 3;
         if(
           skipCache || 
           currentHwLimit !== this.capabilityCache.get('option__target_power__current_limit') || 
-          phases !== this.capabilityCache.get('option__target_power__phases')
+          option.phases !== this.capabilityCache.get('option__target_power__phases')
         ) {
-          const value = this.createTargetPowerOption(phases, currentHwLimit);
+          const value = this.createTargetPowerOption(option.phases, currentHwLimit);
           this.setCapabilityOptions('target_power', value).catch((error) => {
             this.error('Failed to set capability options for target_power:', error);
             this.capabilityCache.delete('option__target_power__current_limit');
@@ -424,7 +423,7 @@ export default class VoltieDevice extends Homey.Device {
           });
           
           this.capabilityCache.set('option__target_power__current_limit', currentHwLimit);
-          this.capabilityCache.set('option__target_power__phases', phases);
+          this.capabilityCache.set('option__target_power__phases', option.phases);
         }
       }else if(capabilityId === 'current_limit') {
         const currentHwLimit = Math.min(parseInt(this.getSetting('maxCurrentLimit'), 10), option);
@@ -451,13 +450,18 @@ export default class VoltieDevice extends Homey.Device {
     }
   }
 
+  private availablePhases(): number {
+    if (this.deviceValues.config?.conf_force_single_phase === 1) return 1;
+    return this.deviceValues.status?.phases || 3;
+  }
+
   private targetPower2CurrentLimit(targetPower: number): number {
-    const phases = this.deviceValues.config?.conf_force_single_phase === 1 ? 1 : 3;
+    const phases = this.availablePhases();
     return Math.max(Math.round(targetPower / 230 / phases), 6);
   }
 
   private currentLimit2TargetPower(currentLimit: number): number {
-    const phases = this.deviceValues.config?.conf_force_single_phase === 1 ? 1 : 3;
+    const phases = this.availablePhases();
     return currentLimit * 230 * phases;
   }
 
