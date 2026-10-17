@@ -40,5 +40,8 @@
   },
   "1.2.0": {
     "en": "Add TargetPower and TargetPowerMode capabilities"
+  },
+  "1.2.1": {
+    "en": "Fix the single-phase bug in targetPower"
   }
 }
